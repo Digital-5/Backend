@@ -1,4 +1,4 @@
-package com.digital5.backend;
+package com.digital5;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
