@@ -1,4 +1,4 @@
-package com.digital5.backend;
+package com.digital5;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
