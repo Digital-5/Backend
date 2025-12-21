@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/pqxdh")
-public class MessageController {
+public class PQXDHController {
 
     @PostMapping("/publish_keys")
     public void publishKeys(@RequestBody PublishKeysModel publishKeysModel) {
