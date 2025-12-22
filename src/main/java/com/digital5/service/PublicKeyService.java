@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PublicKeyService {
 
-    public void registerPublicKeys(String username, PublishKeysModel publishKeysModel) {
+    public void registerPublicKeys(PublishKeysModel publishKeysModel) {
 
     }
 
