@@ -14,6 +14,11 @@ import static com.digital5.service.StringService.sizeLimitString;
 public class VerificationController {
 
 
+    //todo server public key hardcoden im client/ selber eingeben
+    // und verschlüsselt die nachricht immer damit,
+    // der server verschlüsselt nach erhalt seines public keys die antwort mit dem public key des clients
+    // the message itself should be encrypted using the  servers publickey (hardcoded or must be manually typed in) and the other way around too
+
     final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db)
     long timeCachedDbSize = 0L; //ist null damit die db size beim ersten mal geholt wird
     int cachedDbSize = 0; //^^
