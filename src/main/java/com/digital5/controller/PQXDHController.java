@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/pqxdh")
-public class MessageController {
+public class PQXDHController {
 
     private final PublicKeyService publicKeyService;
 
