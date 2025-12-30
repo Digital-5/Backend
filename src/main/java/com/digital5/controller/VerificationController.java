@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 import static com.digital5.service.StringService.cleanString;
 import static com.digital5.service.StringService.sizeLimitString;
 
@@ -13,11 +15,20 @@ import static com.digital5.service.StringService.sizeLimitString;
 @RequestMapping("/verification")
 public class VerificationController {
 
+    //todo
+    // the message sent to us should be encrypted using the servers publickey (must be manually typed in)
+    // AND signed using the users privatekey(->verify)
+    // and from us encrypted via the users publickey(see db) and signed by the servers privatekey (->verify)
 
-    //todo server public key hardcoden im client/ selber eingeben
-    // und verschlüsselt die nachricht immer damit,
-    // der server verschlüsselt nach erhalt seines public keys die antwort mit dem public key des clients
-    // the message itself should be encrypted using the  servers publickey (hardcoded or must be manually typed in) and the other way around too
+    //todo
+    // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature))
+
+    //todo
+    // verification needs the following parameters before saving into the db:
+    // -uuid randomly generated in the backend and sent back if accepted,
+    // -name of the user(will not be saved later on)
+    // -identity publickey that the user generated
+    // -the date when the user requested access in ms
 
     final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db)
     long timeCachedDbSize = 0L; //ist null damit die db size beim ersten mal geholt wird
@@ -38,6 +49,7 @@ public class VerificationController {
 
         long time = System.currentTimeMillis();
 
+        String uuid = String.valueOf(UUID.randomUUID());
 
         /** todo
 
