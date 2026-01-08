@@ -20,9 +20,7 @@ import static com.digital5.service.StringService.sizeLimitString;
 public class VerificationController {
 
     //todo
-    // the message sent to us should be encrypted using the servers publickey (must be manually typed in)
-    // AND signed using the users privatekey(->verify)
-    // and from us encrypted via the users publickey(see db) and signed by the servers privatekey (->verify)
+    // for details check .drawio file
 
     private static final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db)
     private long lastTimeCachedDbSize = System.currentTimeMillis();
@@ -31,7 +29,7 @@ public class VerificationController {
     private long cachedDbSize = waitlistDbService.waitlistSize();
 
 
-    // requestAccess send the following things:
+    // requestAccess sends the following things:
     // -uuid randomly generated in the backend and sent back if accepted,
     // -name of the user(will not be saved later on)
     // -identity publickey that the user generated

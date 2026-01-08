@@ -1,0 +1,70 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0" version="29.2.7">
+  <diagram name="Seite-1" id="bGOjofzPq2kdOGVcRZ_W">
+    <mxGraphModel dx="1281" dy="635" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1000169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;normal API&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="210" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-3" edge="1" parent="1" source="rJ31nRwc8BpF_mZ8l2Zp-2" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="246" y="530" as="sourcePoint" />
+            <mxPoint x="270" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;Https&lt;/div&gt;&lt;div&gt;to server&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="240" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;div&gt;Server decrypts message&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="210" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Server validates jwttoken and rotates it if its older than a few minutes" vertex="1">
+          <mxGeometry height="60" width="120" x="210" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="server sends the message to the recipient and..." vertex="1">
+          <mxGeometry height="60" width="120" x="210" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Server needs Users id(-entity) public/privatekey&amp;nbsp;" vertex="1">
+          <mxGeometry height="80" width="120" x="30" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;first time api&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="user gets all the infos(server ip port and cert? for https)" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;div&gt;user sends https request for access&lt;/div&gt;&lt;div&gt;with ... and id publickey&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;div&gt;Server challenges&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="user in waitlist and needs to refresh(when accepted) too continue GETS uuid" vertex="1">
+          <mxGeometry height="90" width="150" x="425" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="User signs the challenge with his privatekey and sends uuid&amp;nbsp;" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Server validates challenge and if right out of waitlist and to main db sends success and jwt!" vertex="1">
+          <mxGeometry height="80" width="200" x="390" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Alles https" vertex="1">
+          <mxGeometry height="30" width="60" x="80" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;outofdate jwttoken api&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="650" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="user sends uuid signed with his id privatekey" vertex="1">
+          <mxGeometry height="60" width="120" x="650" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="server verifies signature" vertex="1">
+          <mxGeometry height="60" width="120" x="650" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="rJ31nRwc8BpF_mZ8l2Zp-23" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Server sends new jwttoken to user" vertex="1">
+          <mxGeometry height="60" width="120" x="650" y="340" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
