@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 public class PublishKeysModel {
 
+    private String username;
     private String identityKey;
     private String preKey;
     private String preKeySignature;
