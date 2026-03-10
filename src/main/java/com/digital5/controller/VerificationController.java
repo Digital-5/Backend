@@ -79,6 +79,10 @@ public class VerificationController {
     }
 
     //todo
-    // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature))
+    // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature and uuid))
+    @PostMapping("viewStatus")
+    public String viewStatus(@RequestBody x){
+        return "0";
+    }
 }
 
