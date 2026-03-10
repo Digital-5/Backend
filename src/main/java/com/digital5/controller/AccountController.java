@@ -8,10 +8,7 @@ import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.digital5.service.StringService.cleanString;
 import static com.digital5.service.StringService.sizeLimitString;
@@ -42,11 +39,11 @@ public class AccountController {
     // -identity publickey that the user generated
     // -the date when the user requested access in ms
     //
-    @PostMapping("request_access")
-    public String requestAccess(@RequestBody VerificationModel verificationModel) {
+    @PostMapping("/register")
+    public String requestAccess(@RequestBody RegisterModel registerModel) {
 
         String username = sizeLimitString(cleanString(
-                        verificationModel.getFullname()
+                        registerModel.getUsername()
                 ), 30
         ); //no special chars and size limit to 30 chars TODO
 
@@ -75,8 +72,11 @@ public class AccountController {
 
     //todo
     // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature and uuid))
-    @PostMapping("viewStatus")
-    public String viewStatus(@RequestBody x){
+    @GetMapping("/status")
+    public String viewStatus(@RequestBody RegisterModel registerModel){
+        //Prekey=registerModel.getPreKey();
+        //publicKeyService.verifySignature(,prekey,);
+
         return "0";
     }
 }
