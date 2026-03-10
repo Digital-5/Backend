@@ -10,8 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.digital5.service.StringService.cleanString;
-import static com.digital5.service.StringService.sizeLimitString;
+import static com.digital5.service.StringService.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -19,38 +18,30 @@ import static com.digital5.service.StringService.sizeLimitString;
 @RequestMapping("/account")
 public class AccountController {
 
-    //todo
-    // for details check .drawio file
-
-
     @PostMapping("/publish_keys")
     public void publishKeys(@RequestBody RegisterModel publishKeysModel) {
-        //publicKeyService.registerPublicKeys(publishKeysModel);
+        //PublicKeyService.registerPublicKeys(publishKeysModel);
     }
 
-    private static final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db
+    private static final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist db
     @Autowired
     private AccountService accountService;
-
 
     // requestAccess sends the following things:
     // -uuid randomly generated in the backend and sent back if accepted,
     // -name of the user(will not be saved later on)
     // -identity publickey that the user generated
     // -the date when the user requested access in ms
-    //
     @PostMapping("/register")
     public String requestAccess(@RequestBody RegisterModel registerModel) {
 
-        String username = sizeLimitString(cleanString(
-                        registerModel.getUsername()
-                ), 30
-        ); //no special chars and size limit to 30 chars TODO
+        String username = registerModel.getUsername();
+        String publicKey = registerModel.getPreKey();
 
         long time = System.currentTimeMillis();
 
-        /*
-        if (!accountService.publicKeyExists(publicKey)) {
+
+        if (!accountService.publicKeyExists(publicKey) && isValidString(username,20)) {
 
             AccountEntity user = new AccountEntity();
 
@@ -63,10 +54,8 @@ public class AccountController {
                 return "200 " + uuid;
             }
         } else {
-            log.warn("Failed to add User to the waitlist, check if he didnt already request access and if the number Users in the waitlist didnt reach the maximum");
+            log.warn("Failed to add User to the waitlist, check if he didnt already request access and if the number of Users in the waitlist didnt reach the maximum");
         }
-        return "500 Internal Server Error \n Please try again later";
-        */
         return "500 Internal Server Error \n Please try again later";
     }
 
@@ -74,7 +63,7 @@ public class AccountController {
     // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature and uuid))
     @GetMapping("/status")
     public String viewStatus(@RequestBody RegisterModel registerModel){
-        //Prekey=registerModel.getPreKey();
+        String prekey=registerModel.getPreKey();
         //publicKeyService.verifySignature(,prekey,);
 
         return "0";
