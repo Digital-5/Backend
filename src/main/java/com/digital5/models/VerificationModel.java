@@ -7,4 +7,6 @@ public class VerificationModel {
 
     String fullname;
     String publicKey;
+    //mehr keys
+
 }
