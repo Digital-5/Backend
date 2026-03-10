@@ -1,12 +1,12 @@
 package com.digital5.service;
 
-import com.digital5.models.PublishKeysModel;
+import com.digital5.models.RegisterModel;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PublicKeyService {
 
-    public void registerPublicKeys(PublishKeysModel publishKeysModel) {
+    public void registerPublicKeys(RegisterModel publishKeysModel) {
 
     }
 

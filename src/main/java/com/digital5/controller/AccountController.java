@@ -1,9 +1,11 @@
 package com.digital5.controller;
 
-import com.digital5.entity.VerifyUserEntity;
-import com.digital5.models.VerificationModel;
+import com.digital5.entity.AccountEntity;
+import com.digital5.models.RegisterModel;
+import com.digital5.service.PublicKeyService;
 import com.digital5.service.StringService;
-import com.digital5.service.WaitlistDbService;
+import com.digital5.service.AccountService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,18 +17,23 @@ import static com.digital5.service.StringService.cleanString;
 import static com.digital5.service.StringService.sizeLimitString;
 
 @Slf4j
+@AllArgsConstructor
 @RestController
-@RequestMapping("/verification")
-public class VerificationController {
+@RequestMapping("/account")
+public class AccountController {
 
     //todo
     // for details check .drawio file
 
-    private static final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db)
-    private long lastTimeCachedDbSize = System.currentTimeMillis();
+
+    @PostMapping("/publish_keys")
+    public void publishKeys(@RequestBody RegisterModel publishKeysModel) {
+        //publicKeyService.registerPublicKeys(publishKeysModel);
+    }
+
+    private static final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db
     @Autowired
-    private WaitlistDbService waitlistDbService;
-    private long cachedDbSize = waitlistDbService.waitlistSize();
+    private AccountService accountService;
 
 
     // requestAccess sends the following things:
@@ -41,40 +48,28 @@ public class VerificationController {
         String username = sizeLimitString(cleanString(
                         verificationModel.getFullname()
                 ), 30
-        ); //no special chars and size limit to 30 chars
-
-        String publicKey = sizeLimitString(cleanString(StringService.hexToString(
-
-                        verificationModel.getPublicKey()
-                )
-            ), 500
-        ); //convert key to hex, then remove special chars and at last limit the size of the String to 500 chars
-
+        ); //no special chars and size limit to 30 chars TODO
 
         long time = System.currentTimeMillis();
 
-        if (cachedDbSize > MAX_WAIT_LIST_SIZE && time - lastTimeCachedDbSize > (1000 * 60 * 10)) {
-            //if cached dbsize too big and the last refresh was more than 10min ago
-            cachedDbSize = waitlistDbService.waitlistSize();
-            lastTimeCachedDbSize = time;
-        }
+        /*
+        if (!accountService.publicKeyExists(publicKey)) {
 
-
-        if (!waitlistDbService.publicKeyExists(publicKey) && cachedDbSize < MAX_WAIT_LIST_SIZE) {
-
-            VerifyUserEntity user = new VerifyUserEntity();
+            AccountEntity user = new AccountEntity();
 
             user.setFull_name(username);
             user.setPublickey(publicKey);
             user.setDate(time);
             //and the uuid gets generated before its saved
-            String uuid = waitlistDbService.saveUser(user); //temporary var to return the user his new uuid
+            String uuid = accountService.saveUser(user); //temporary var to return the user his new uuid
             if (uuid != null) {
                 return "200 " + uuid;
             }
         } else {
             log.warn("Failed to add User to the waitlist, check if he didnt already request access and if the number Users in the waitlist didnt reach the maximum");
         }
+        return "500 Internal Server Error \n Please try again later";
+        */
         return "500 Internal Server Error \n Please try again later";
     }
 

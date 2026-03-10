@@ -2,7 +2,8 @@ package com.digital5.models;
 
 import java.util.HashMap;
 
-public class PublishKeysModel {
+@Getter
+public class RegisterModel {
 
     private String username;
     private String identityKey;

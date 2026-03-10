@@ -3,9 +3,11 @@ package com.digital5.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity(name="keys")
+@Table(name="keys")
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 public class PublicKeysEntity {
