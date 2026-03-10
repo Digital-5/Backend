@@ -15,7 +15,7 @@ public class JWTService {
                 return false;
             }
             assert validateHeader(splitToken[0]);
-            assert validatePayload(splitToken[1]);
+            assert validatePayload(splitToken[1], splitToken[2]);
             // TODO: validate signature with public key from db
             return true;
         } catch (Exception e) {
@@ -23,10 +23,10 @@ public class JWTService {
         }
     }
 
-    private boolean validateHeader(String json) {
+    private boolean validateHeader(String header) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            JsonNode root = mapper.readTree(json);
+            JsonNode root = mapper.readTree(header);
             String signingAlgorithm = root.get("alg").asString();
             assert signingAlgorithm.equals("XEdDSA");
             String type = root.get("typ").asString();
@@ -37,16 +37,19 @@ public class JWTService {
         }
     }
 
-    private boolean validatePayload(String json) {
+    private boolean validatePayload(String payload, String signature) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            JsonNode root = mapper.readTree(json);
+            JsonNode root = mapper.readTree(payload);
             assert root.has("sub");
             // Check for a username, lookup public key in db to verify signature
             assert root.has("iat");
             // iat can't be in the future
             assert root.has("exp");
             // exp must be in the future, difference between iat and exp must be ~15m?
+
+
+
             return true;
         } catch (JacksonException e) {
             return false;
