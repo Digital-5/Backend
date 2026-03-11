@@ -16,7 +16,7 @@ import lombok.Setter;
 public class MessageEntity {
 
     @Id
-    @Column(name="id", nullable = false)
+    @Column(name="id", nullable = false, unique = true)
     private String Id;
     @Column(name="sender", nullable = false)
     private String sender;

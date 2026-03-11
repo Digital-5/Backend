@@ -13,9 +13,9 @@ import lombok.*;
 public class PublicKeysEntity {
 
     @Id
-    @Column(name="username", unique = true, nullable = false)
-    private String username;
-    @Column(name="identity_key", nullable = false)
+    @Column(name="uuid", unique = true, nullable = false)
+    private String uuid;
+    @Column(name="identity_key", nullable = false, unique = true)
     private String identityKey;
     @Column(name="prekey", nullable = false)
     private String preKey;
