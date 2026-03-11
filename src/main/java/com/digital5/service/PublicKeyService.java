@@ -15,4 +15,5 @@ public class PublicKeyService {
         return true; //wenn passt
         //return false; //wenn nicht passt
     }
+    //todo registerpublickey
 }
