@@ -10,7 +10,7 @@ public class PublicKeyService {
 
     }
 
-    public boolean verifySignature(String uuid, String key, String signature){
+    public boolean verifySignature(String uuid, String data, String signature){
         //ratelimit
         return true; //wenn passt
         //return false; //wenn nicht passt

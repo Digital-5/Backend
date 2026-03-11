@@ -1,17 +1,11 @@
 package com.digital5.controller;
 
-import com.digital5.entity.AccountEntity;
 import com.digital5.models.RegisterModel;
-import com.digital5.service.PublicKeyService;
-import com.digital5.service.StringService;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import static com.digital5.service.StringService.cleanString;
-import static com.digital5.service.StringService.sizeLimitString;
 
 @Slf4j
 @AllArgsConstructor
@@ -28,8 +22,6 @@ public class AccountController {
         //publicKeyService.registerPublicKeys(publishKeysModel);
     }
 
-    private static final short MAX_WAIT_LIST_SIZE = 50; //max number of users in waitlist (db
-    @Autowired
     private AccountService accountService;
 
 
@@ -42,6 +34,7 @@ public class AccountController {
     @PostMapping("/register")
     public String requestAccess(@RequestBody RegisterModel registerModel) {
 
+        /*
         String username = sizeLimitString(cleanString(
                         registerModel.getUsername()
                 ), 30
@@ -49,7 +42,7 @@ public class AccountController {
 
         long time = System.currentTimeMillis();
 
-        /*
+
         if (!accountService.publicKeyExists(publicKey)) {
 
             AccountEntity user = new AccountEntity();
