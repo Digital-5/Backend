@@ -28,6 +28,10 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+      env:
+        db_url: ${{ secrets.db_url }}
+        db_user: ${{ secrets.db_user }}
+        db_password: ${{ secrets.db_password }}
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
