@@ -20,14 +20,14 @@ public class JWTService {
 
     private AccountService accountService;
     private PublicKeyService publicKeyService;
-
+    /*
     public boolean verifyJWT(String token) {
         try {
             String[] splitToken = token.split("\\.");
             if (splitToken.length != 3) {
                 return false;
             }
-            assert validateHeader(splitToken[0]);
+            if (validateHeader(splitToken[0]) &&
             String uuid = validatePayload(splitToken[1], splitToken[2]);
             if (uuid == null) {
                 return false;
@@ -39,6 +39,7 @@ public class JWTService {
             return false;
         }
     }
+    */
 
     private boolean validateHeader(String header) {
         ObjectMapper mapper = new ObjectMapper();
