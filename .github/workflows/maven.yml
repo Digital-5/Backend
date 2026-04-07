@@ -34,3 +34,23 @@ jobs:
         
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
+    - name: Build Docker image
+      run: |
+        docker build -t backend:latest .
+
+    - name: Stop old container
+      run: |
+        docker stop backend || true
+        docker rm backend || true
+
+    - name: Run container
+      run: |
+        docker run -d \
+          --name backend \
+          --restart always \
+          -p 8080:8080 \
+          -e DB_URL=${DB_URL} \
+          -e DB_USER=${DB_USER} \
+          -e DB_PASSWORD=${DB_PASSWORD} \
+          backend:latest
