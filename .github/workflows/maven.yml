@@ -54,5 +54,6 @@ jobs:
           -e DB_USER=${DB_USER} \
           -e DB_PASSWORD=${DB_PASSWORD} \
           --network="host" \
-          -it --entrypoint /bin/bash \
-          backend:latest
+          --entrypoint sh \
+          backend:latest \
+          -c "env"
