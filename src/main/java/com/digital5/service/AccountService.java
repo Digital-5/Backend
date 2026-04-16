@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -17,6 +18,11 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     public String registerNewUser(RegisterModel registerModel) {
+
+        if (!registerModel.getUsername().toLowerCase().matches("^[a-z]{4,30}$")) {
+
+        }
+
         UUID uuid = UUID.randomUUID();
         try{
             AccountEntity User = new AccountEntity(
