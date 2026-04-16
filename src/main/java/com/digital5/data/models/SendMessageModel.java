@@ -1,4 +1,4 @@
-package com.digital5.models;
+package com.digital5.data.models;
 
 public class SendMessageModel {
 

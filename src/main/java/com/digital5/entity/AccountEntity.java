@@ -21,8 +21,8 @@ public class AccountEntity {
     String uuid;
     @Column(name = "username", nullable = false, unique = true)
     String username;
-    @Column(name = "identity_key", nullable = false,unique = true)
-    String identityKey;
+    @Column(name = "status", nullable = false, unique = false)
+    short status;
     @Column(name = "created_at", nullable = false)
     long createdAt;
 }

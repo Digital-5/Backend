@@ -9,9 +9,9 @@ public class DigitalException extends Exception {
     @Getter
     private final HttpStatus statusCode;
 
-    public DigitalException(String message, HttpStatus statusCode) {
-        this.message = message;
+    public DigitalException(HttpStatus statusCode, String message) {
         this.statusCode = statusCode;
+        this.message = message;
     }
 
     @Override

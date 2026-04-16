@@ -14,13 +14,13 @@ public class Logger {
         System.out.println(LoggingFormatter.format(logging, LogLevel.INFO));
     }
 
-    public static void log(String logging, LogLevel loglevel)  {
+    public static void log(LogLevel loglevel, String logging)  {
         System.out.println(LoggingFormatter.format(logging, loglevel));
     }
 
     public static void logError(Exception error) {
         error.printStackTrace();
-        Logger.log("Error Occurred! Message: " + error.getMessage() + "; Stack Trace:", LogLevel.ERROR);
+        Logger.log(LogLevel.ERROR, "Error Occurred! Message: " + error.getMessage() + "; Stack Trace:");
         error.printStackTrace();
     }
 
@@ -28,7 +28,7 @@ public class Logger {
         HttpStatus code = error.getStatusCode();
         String message = error.getMessage();
         LogLevel level = code == HttpStatus.INTERNAL_SERVER_ERROR ? LogLevel.ERROR : LogLevel.WARN;
-        Logger.log("Digital Exception Occurred! Message: " + message + "; Status Code: " + code, level);
+        Logger.log(level, "Digital Exception Occurred! Message: " + message + "; Status Code: " + code);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.digital5.controller;
 
-import com.digital5.models.RegisterModel;
+import com.digital5.exception.DigitalException;
+import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,42 +18,10 @@ public class AccountController {
 
     private AccountService accountService;
 
-    // requestAccess sends the following things:
-    // -uuid randomly generated in the backend and sent back if accepted,
-    // -name of the user(will not be saved later on)
-    // -identity publickey that the user generated
-    // -the date when the user requested access in ms
-    //
     @PostMapping("/register")
-    public String requestAccess(@RequestBody RegisterModel registerModel) {
-
-        /*
-        String username = sizeLimitString(cleanString(
-                        registerModel.getUsername()
-                ), 30
-        ); //no special chars and size limit to 30 chars TODO
-
-        long time = System.currentTimeMillis();
-
-
-        if (!accountService.publicKeyExists(publicKey)) {
-
-            AccountEntity user = new AccountEntity();
-
-            user.setFull_name(username);
-            user.setPublickey(publicKey);
-            user.setDate(time);
-            //and the uuid gets generated before its saved
-            String uuid = accountService.saveUser(user); //temporary var to return the user his new uuid
-            if (uuid != null) {
-                return "200 " + uuid;
-            }
-        } else {
-            log.warn("Failed to add User to the waitlist, check if he didnt already request access and if the number Users in the waitlist didnt reach the maximum");
-        }
-        return "500 Internal Server Error \n Please try again later";
-        */
-        return "500 Internal Server Error \n Please try again later";
+    public String requestAccess(@RequestBody RegisterModel registerModel) throws DigitalException {
+        accountService.registerNewUser(registerModel);
+        return "temp";
     }
 
     //todo

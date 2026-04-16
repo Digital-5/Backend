@@ -1,6 +1,6 @@
 package com.digital5.service;
 
-import com.digital5.models.RegisterModel;
+import com.digital5.data.models.RegisterModel;
 import org.springframework.stereotype.Service;
 
 @Service
