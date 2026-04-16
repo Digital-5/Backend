@@ -1,48 +1,52 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
-import com.digital5.models.RegisterModel;
+import com.digital5.exception.DigitalException;
+import com.digital5.logger.LogLevel;
+import com.digital5.logger.Logger;
+import com.digital5.data.models.RegisterModel;
 import com.digital5.repository.AccountRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Locale;
 import java.util.UUID;
 
 @Service
-@Slf4j
 public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
 
-    public String registerNewUser(RegisterModel registerModel) {
+    public String registerNewUser(RegisterModel registerModel) throws DigitalException {
 
-        if (!registerModel.getUsername().toLowerCase().matches("^[a-z]{4,30}$")) {
-
+        if (!registerModel.getUsername().toLowerCase().matches("^[a-z0-9]{4,30}$")) {
+            throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid Username, should be only alphanumeric between 4-30 characters.");
         }
+
+        //TODO: Verify all signatures!
+        //TODO: verify if the keys are not already in use
 
         UUID uuid = UUID.randomUUID();
         try{
             AccountEntity User = new AccountEntity(
                 uuid.toString(),
                 registerModel.getUsername(),
-                registerModel.getIdentityKey(),
+                (short) 0,
                 System.currentTimeMillis()
             );
             accountRepository.save(User);
             return uuid.toString();
         } catch (Exception e) {
-            log.error("Error while saving User in Database: "+e);
+            Logger.logError(e);
+            throw new DigitalException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not register new account.");
         }
-        return null;
     }
 
     public AccountEntity getUserByUUID(String uuid) {
         AccountEntity account =  accountRepository.findById(uuid).orElse(null);
         if (account == null) {
-            log.error("User with uuid "+uuid+" not found in database");
+            Logger.log(LogLevel.WARN, "User with UUID: " + uuid + " was requested, but not found.");
         }
         return account;
     }

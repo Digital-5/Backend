@@ -1,7 +1,7 @@
 package com.digital5.controller;
 
-import com.digital5.models.JWTModel;
-import com.digital5.models.SendMessageModel;
+import com.digital5.data.models.JWTModel;
+import com.digital5.data.models.SendMessageModel;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
