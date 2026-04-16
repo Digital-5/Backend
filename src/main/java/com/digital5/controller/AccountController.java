@@ -5,6 +5,7 @@ import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -19,13 +20,13 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping("/register")
-    public String requestAccess(@RequestBody RegisterModel registerModel) throws DigitalException {
+    public ResponseEntity<String> requestAccess(@RequestBody RegisterModel registerModel) throws DigitalException {
         accountService.registerNewUser(registerModel);
-        return "temp";
+        return ResponseEntity.ok("Account registered successfully");
     }
 
     //todo
-    // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature and uuid))
+    // api to view the acceptance status (verify via jwt)
     @GetMapping("/status")
     public String viewStatus(@RequestBody RegisterModel registerModel){
         //Prekey=registerModel.getPreKey();
