@@ -4,7 +4,6 @@ import com.digital5.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -16,14 +15,7 @@ public class AccountController {
     //todo
     // for details check .drawio file
 
-
-    @PostMapping("/publish_keys")
-    public void publishKeys(@RequestBody RegisterModel publishKeysModel) {
-        //publicKeyService.registerPublicKeys(publishKeysModel);
-    }
-
     private AccountService accountService;
-
 
     // requestAccess sends the following things:
     // -uuid randomly generated in the backend and sent back if accepted,
@@ -73,4 +65,3 @@ public class AccountController {
         return "0";
     }
 }
-
