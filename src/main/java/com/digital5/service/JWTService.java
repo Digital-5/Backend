@@ -21,8 +21,8 @@ public class JWTService {
     private AccountService accountService;
     private PublicKeyService publicKeyService;
 
-    public boolean verifyJWT(String token) {
-        return true;
+    public JsonNode verifyJWT(String token) {
+        return null;
         /*
         try {
             String[] splitToken = token.split("\\.");
@@ -63,7 +63,7 @@ public class JWTService {
         try {
             JsonNode root = mapper.readTree(payload);
             assert root.has("sub");
-            AccountEntity account = accountService.getUserByUUID(root.get("sub").asString());
+            AccountEntity account = accountService.getUserFromUUID(root.get("sub").asString());
             assert root.has("iat");
             Date issuedAt = (Date) Date.from(Instant.ofEpochSecond(root.get("iat").asLong()));
             assert issuedAt.before(Date.from(Instant.now()));

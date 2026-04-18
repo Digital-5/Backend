@@ -1,5 +1,8 @@
 package com.digital5.controller;
 
+import com.digital5.data.DataResponse;
+import com.digital5.data.models.AuthenticationModel;
+import com.digital5.entity.AccountEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
@@ -23,10 +26,11 @@ public class AccountController {
     //todo
     // api to view the acceptance status (verify via jwt)
     @GetMapping("/status")
-    public String viewStatus(@RequestBody RegisterModel registerModel){
-        //Prekey=registerModel.getPreKey();
-        //publicKeyService.verifySignature(,prekey,);
-
-        return "0";
+    public ResponseEntity<String> viewStatus(@RequestBody AuthenticationModel authenticationModel) throws DigitalException {
+        String jwt = authenticationModel.getJwt();
+        AccountEntity user = accountService.authenticateUser(jwt);
+        DataResponse response = new DataResponse();
+        response.addData("account_status", String.valueOf(user.getStatus()));
+        return ResponseEntity.ok(response.toJsonString());
     }
 }
