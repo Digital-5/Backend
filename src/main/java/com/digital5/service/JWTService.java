@@ -1,8 +1,7 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
-import com.digital5.entity.PublicKeysEntity;
-import com.digital5.repository.KeysRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -13,6 +12,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Service
+@AllArgsConstructor
 public class JWTService {
 
     private static final long JWT_EXPIRY_TIME = 1;
