@@ -20,7 +20,7 @@ public class ExceptionHandler {
             return errorResponse.toResponseEntity();
 
         }else if (exception instanceof HttpRequestMethodNotSupportedException) {
-            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST, "Invalid request. Stop trying to hack us!");
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, "Invalid request. Stop trying to hack us!");
             return errorResponse.toResponseEntity();
 
         }else if (exception instanceof HttpMessageNotReadableException) {
