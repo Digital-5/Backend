@@ -4,6 +4,7 @@ import com.digital5.exception.DigitalException;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class AccountController {
     //todo
     // api to view the acceptance status (ratelimited to once per minute per person(verify via privatekey signature and uuid))
     @GetMapping("/status")
-    public String viewStatus(@RequestBody RegisterModel registerModel){
+    public String viewStatus(@RequestBody @NonNull RegisterModel registerModel){
         //Prekey=registerModel.getPreKey();
         //publicKeyService.verifySignature(,prekey,);
 

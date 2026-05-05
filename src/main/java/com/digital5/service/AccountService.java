@@ -6,6 +6,7 @@ import com.digital5.logger.LogLevel;
 import com.digital5.logger.Logger;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.repository.AccountRepository;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    public String registerNewUser(RegisterModel registerModel) throws DigitalException {
+    public String registerNewUser(@NonNull RegisterModel registerModel) throws DigitalException {
 
         if (!registerModel.getUsername().toLowerCase().matches("^[a-z0-9]{4,30}$")) {
             throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid Username, should be only alphanumeric between 4-30 characters.");
