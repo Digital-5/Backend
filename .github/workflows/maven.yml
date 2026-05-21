@@ -19,29 +19,13 @@ jobs:
     environment: production
 
     env:
-        DB_URL: ${{ secrets.DB_URL }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: |
-        docker build -t backend:latest .
 
-    - name: Stop old container
+    - name: Deploy with Compose
       run: |
-        docker stop backend || true
-        docker rm backend || true
-
-    - name: Run container
-      run: |
-        docker run -d \
-          --name backend \
-          --restart always \
-          -p 8080:8080 \
-          -e DB_URL=${DB_URL} \
-          -e DB_USER=${DB_USER} \
-          -e DB_PASSWORD=${DB_PASSWORD} \
-          --network="host" \
-          backend:latest
+        docker compose down --remove-orphans
+        docker compose up --build -d
