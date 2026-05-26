@@ -1,76 +1,147 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
-import com.digital5.entity.PublicKeysEntity;
-import com.digital5.repository.KeysRepository;
 import org.springframework.stereotype.Service;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.sql.Date;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 
+/**
+ * Service for verifying XEdDSA-signed JWTs.
+ * <p>
+ * JWT format: base64url(header).base64url(payload).hex(signature)
+ * The signature covers the ASCII bytes of "base64url(header).base64url(payload)".
+ */
 @Service
 public class JWTService {
 
-    private static final long JWT_EXPIRY_TIME = 1;
-    private static final ChronoUnit JWT_EXPIRY_UNIT = ChronoUnit.DAYS;
+    private static final long JWT_MAX_AGE = 1;
+    private static final ChronoUnit JWT_MAX_AGE_UNIT = ChronoUnit.DAYS;
+    private static final String EXPECTED_ALGORITHM = "XEdDSA";
+    private static final String EXPECTED_TYPE = "JWT";
 
-    private AccountService accountService;
-    private PublicKeyService publicKeyService;
-    /*
-    public boolean verifyJWT(String token) {
+    private final ObjectMapper objectMapper;
+    private final AccountService accountService;
+    private final PublicKeyService publicKeyService;
+
+    public JWTService(AccountService accountService, PublicKeyService publicKeyService) {
+        this.objectMapper = new ObjectMapper();
+        this.accountService = accountService;
+        this.publicKeyService = publicKeyService;
+    }
+
+    /**
+     * Verifies a JWT token: validates structure, header, payload timestamps,
+     * and XEdDSA signature against the user's stored identity key.
+     *
+     * @param token the full JWT string (header.payload.signature)
+     * @return the UUID of the authenticated user, or null if verification fails
+     */
+    public String verifyJWT(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
         try {
-            String[] splitToken = token.split("\\.");
-            if (splitToken.length != 3) {
-                return false;
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                return null;
             }
-            if (validateHeader(splitToken[0]) &&
-            String uuid = validatePayload(splitToken[1], splitToken[2]);
+
+            if (!validateHeader(parts[0])) {
+                return null;
+            }
+
+            String uuid = validatePayload(parts[1]);
             if (uuid == null) {
-                return false;
+                return null;
             }
-            publicKeyService.verifySignature(uuid, splitToken[0]+"."+splitToken[1], splitToken[2]);
 
-            return true;
+            // Signature covers "header.payload" as raw ASCII bytes
+            String signedData = parts[0] + "." + parts[1];
+            if (!publicKeyService.verifySignature(uuid, signedData, parts[2])) {
+                return null;
+            }
+
+            return uuid;
         } catch (Exception e) {
-            return false;
-        }
-    }
-    */
-
-    private boolean validateHeader(String header) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode root = mapper.readTree(header);
-            String signingAlgorithm = root.get("alg").asString();
-            assert signingAlgorithm.equals("XEdDSA");
-            String type = root.get("typ").asString();
-            assert type.equals("JWT");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private String validatePayload(String payload, String signature) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode root = mapper.readTree(payload);
-            assert root.has("sub");
-            AccountEntity account = accountService.getUserByUUID(root.get("sub").asString());
-            assert root.has("iat");
-            Date issuedAt = (Date) Date.from(Instant.ofEpochSecond(root.get("iat").asLong()));
-            assert issuedAt.before(Date.from(Instant.now()));
-            assert root.has("exp");
-            Date expiresAt = (Date) Date.from(Instant.ofEpochSecond(root.get("exp").asLong()));
-            assert expiresAt.after(Date.from(Instant.now().plus(JWT_EXPIRY_TIME, JWT_EXPIRY_UNIT)));
-            return account.getUuid();
-        } catch (JacksonException e) {
             return null;
         }
     }
 
+    private boolean validateHeader(String headerBase64url) {
+        try {
+            String headerJson = decodeBase64url(headerBase64url);
+            JsonNode root = objectMapper.readTree(headerJson);
+
+            String alg = root.path("alg").asString();
+            if (!EXPECTED_ALGORITHM.equals(alg)) {
+                return false;
+            }
+
+            String typ = root.path("typ").asString();
+            if (!EXPECTED_TYPE.equals(typ)) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String validatePayload(String payloadBase64url) {
+        try {
+            String payloadJson = decodeBase64url(payloadBase64url);
+            JsonNode root = objectMapper.readTree(payloadJson);
+
+            if (!root.has("sub")) {
+                return null;
+            }
+            String uuid = root.get("sub").asString();
+
+            AccountEntity account = accountService.getUserByUUID(uuid);
+            if (account == null) {
+                return null;
+            }
+
+            Instant now = Instant.now();
+
+            // Validate iat (issued at): must be present and in the past
+            if (!root.has("iat")) {
+                return null;
+            }
+            Instant issuedAt = Instant.ofEpochSecond(root.get("iat").asLong());
+            if (issuedAt.isAfter(now)) {
+                return null;
+            }
+
+            // Validate exp (expires at): must be present and in the future
+            if (!root.has("exp")) {
+                return null;
+            }
+            Instant expiresAt = Instant.ofEpochSecond(root.get("exp").asLong());
+            if (expiresAt.isBefore(now)) {
+                return null;
+            }
+
+            // Reject tokens with unreasonably long validity
+            Instant maxExpiry = now.plus(JWT_MAX_AGE, JWT_MAX_AGE_UNIT);
+            if (expiresAt.isAfter(maxExpiry)) {
+                return null;
+            }
+
+            return account.getUuid();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String decodeBase64url(String base64url) {
+        byte[] decoded = Base64.getUrlDecoder().decode(base64url);
+        return new String(decoded, StandardCharsets.UTF_8);
+    }
 }
