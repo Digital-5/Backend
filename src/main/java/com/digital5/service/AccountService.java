@@ -10,6 +10,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    private JWTService jwtService;
 
     public String registerNewUser(@NonNull RegisterModel registerModel) throws DigitalException {
 
@@ -44,7 +46,13 @@ public class AccountService {
         }
     }
 
-    public AccountEntity getUserByUUID(String uuid) {
+    public AccountEntity authenticateUser(String jwt) {
+        JsonNode userNode = jwtService.verifyJWT(jwt);
+        String uuid = userNode.get("uuid").toString();
+        return getUserFromUUID(uuid);
+    }
+
+    public AccountEntity getUserFromUUID(String uuid) {
         AccountEntity account =  accountRepository.findById(uuid).orElse(null);
         if (account == null) {
             Logger.log(LogLevel.WARN, "User with UUID: " + uuid + " was requested, but not found.");

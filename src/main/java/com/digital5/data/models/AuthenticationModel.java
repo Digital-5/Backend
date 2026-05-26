@@ -4,10 +4,6 @@ import com.digital5.entity.AccountEntity;
 import lombok.Getter;
 
 @Getter
-public class UserStatusModel {
-
-
+public class AuthenticationModel {
+    private String jwt;
 }
-
-
-

@@ -1,11 +1,13 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.nio.charset.StandardCharsets;
+import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
@@ -17,6 +19,7 @@ import java.util.Base64;
  * The signature covers the ASCII bytes of "base64url(header).base64url(payload)".
  */
 @Service
+@AllArgsConstructor
 public class JWTService {
 
     private static final long JWT_MAX_AGE = 1;
