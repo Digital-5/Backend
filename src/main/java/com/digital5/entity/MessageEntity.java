@@ -17,7 +17,7 @@ public class MessageEntity {
 
     @Id
     @Column(name="id", nullable = false, unique = true)
-    private String Id;
+    private String id;
     @Column(name="sender", nullable = false)
     private String sender;
     @Column(name="recipient", nullable = false)

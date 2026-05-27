@@ -7,8 +7,6 @@ import com.digital5.exception.DigitalException;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

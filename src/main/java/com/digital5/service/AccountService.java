@@ -10,7 +10,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.JsonNode;
 
 import java.util.UUID;
 
@@ -32,13 +31,13 @@ public class AccountService {
 
         UUID uuid = UUID.randomUUID();
         try{
-            AccountEntity User = new AccountEntity(
+            AccountEntity user = new AccountEntity(
                 uuid.toString(),
                 registerModel.getUsername(),
                 (short) 0,
                 System.currentTimeMillis()
             );
-            accountRepository.save(User);
+            accountRepository.save(user);
             return uuid.toString();
         } catch (Exception e) {
             Logger.logError(e);
@@ -46,9 +45,8 @@ public class AccountService {
         }
     }
 
-    public AccountEntity authenticateUser(String jwt) {
-        JsonNode userNode = jwtService.verifyJWT(jwt);
-        String uuid = userNode.get("uuid").toString();
+    public AccountEntity authenticateUser(String jwt) throws DigitalException {
+        String uuid = jwtService.verifyJWT(jwt);
         return getUserFromUUID(uuid);
     }
 
