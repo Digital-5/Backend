@@ -1,14 +1,17 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
-import lombok.AllArgsConstructor;
+import com.digital5.exception.DigitalException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 
 /**
  * Service for verifying XEdDSA-signed JWTs.
@@ -17,7 +20,6 @@ import java.time.temporal.ChronoUnit;
  * The signature covers the ASCII bytes of "base64url(header).base64url(payload)".
  */
 @Service
-@AllArgsConstructor
 public class JWTService {
 
     private static final long JWT_MAX_AGE = 1;
@@ -35,6 +37,11 @@ public class JWTService {
         this.publicKeyService = publicKeyService;
     }
 
+    private static String decodeBase64url(String base64url) {
+        byte[] decoded = Base64.getUrlDecoder().decode(base64url);
+        return new String(decoded, StandardCharsets.UTF_8);
+    }
+
     /**
      * Verifies a JWT token: validates structure, header, payload timestamps,
      * and XEdDSA signature against the user's stored identity key.
@@ -42,32 +49,29 @@ public class JWTService {
      * @param token the full JWT string (header.payload.signature)
      * @return the UUID of the authenticated user, or null if verification fails
      */
-    public String verifyJWT(String token) {
-        if (token == null || token.isBlank()) {
-            return null;
-        }
+    public String verifyJWT(String token) throws DigitalException {
         try {
+            if (token == null || token.isBlank()) {
+                throw new DigitalException(HttpStatus.BAD_REQUEST, "JWT token is missing.");
+            }
+
             String[] parts = token.split("\\.");
             if (parts.length != 3) {
-                return null;
+                throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
             }
 
-            if (!validateHeader(parts[0])) {
-                return null;
-            }
 
             String uuid = validatePayload(parts[1]);
-            if (uuid == null) {
-                return null;
-            }
-
             // Signature covers "header.payload" as raw ASCII bytes
             String signedData = parts[0] + "." + parts[1];
-            if (!publicKeyService.verifySignature(uuid, signedData, parts[2])) {
-                return null;
+
+            if (!validateHeader(parts[0]) ||uuid==null ||!publicKeyService.verifySignature(uuid, signedData, parts[2])) {
+                throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
             }
 
             return uuid;
+        } catch (DigitalException e) {
+            throw e;
         } catch (Exception e) {
             return null;
         }
@@ -79,16 +83,10 @@ public class JWTService {
             JsonNode root = objectMapper.readTree(headerJson);
 
             String alg = root.path("alg").asString();
-            if (!EXPECTED_ALGORITHM.equals(alg)) {
-                return false;
-            }
-
             String typ = root.path("typ").asString();
-            if (!EXPECTED_TYPE.equals(typ)) {
-                return false;
-            }
 
-            return true;
+            return EXPECTED_TYPE.equals(typ) && EXPECTED_ALGORITHM.equals(alg);
+
         } catch (Exception e) {
             return false;
         }
@@ -104,7 +102,7 @@ public class JWTService {
             }
             String uuid = root.get("sub").asString();
 
-            AccountEntity account = accountService.getUserByUUID(uuid);
+            AccountEntity account = accountService.getUserFromUUID(uuid);
             if (account == null) {
                 return null;
             }

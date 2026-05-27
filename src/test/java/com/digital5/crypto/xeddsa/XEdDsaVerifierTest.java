@@ -56,7 +56,7 @@ class XEdDsaVerifierTest {
     // --- End-to-End XEdDSA verify tests ---
 
     @Test
-    void verify_ed25519SignatureWithCompatibleX25519Key_returnsTrue() {
+    void verify_ed25519SignatureWithCompatibleX25519Key_returnsTrue() throws SignatureVerificationException {
         byte[][] keySet = XEdDsaTestHelper.generateCompatibleKeySet();
         byte[] seed = keySet[0];
         byte[] x25519PublicKey = keySet[2];
@@ -68,7 +68,7 @@ class XEdDsaVerifierTest {
     }
 
     @Test
-    void verify_multipleMessages_allValid() {
+    void verify_multipleMessages_allValid() throws SignatureVerificationException {
         byte[][] keySet = XEdDsaTestHelper.generateCompatibleKeySet();
         byte[] seed = keySet[0];
         byte[] x25519PublicKey = keySet[2];
@@ -82,7 +82,7 @@ class XEdDsaVerifierTest {
     }
 
     @Test
-    void verify_tamperedMessage_returnsFalse() {
+    void verify_tamperedMessage_returnsFalse() throws SignatureVerificationException {
         byte[][] keySet = XEdDsaTestHelper.generateCompatibleKeySet();
         byte[] seed = keySet[0];
         byte[] x25519PublicKey = keySet[2];
@@ -95,7 +95,7 @@ class XEdDsaVerifierTest {
     }
 
     @Test
-    void verify_wrongPublicKey_returnsFalse() {
+    void verify_wrongPublicKey_returnsFalse() throws SignatureVerificationException {
         byte[][] keySet1 = XEdDsaTestHelper.generateCompatibleKeySet();
         byte[][] keySet2 = XEdDsaTestHelper.generateCompatibleKeySet();
 
@@ -106,7 +106,7 @@ class XEdDsaVerifierTest {
     }
 
     @Test
-    void verify_tamperedSignature_returnsFalse() {
+    void verify_tamperedSignature_returnsFalse() throws SignatureVerificationException {
         byte[][] keySet = XEdDsaTestHelper.generateCompatibleKeySet();
         byte[] seed = keySet[0];
         byte[] x25519PublicKey = keySet[2];
@@ -119,7 +119,7 @@ class XEdDsaVerifierTest {
     }
 
     @Test
-    void verify_emptyMessage_works() {
+    void verify_emptyMessage_works() throws SignatureVerificationException {
         byte[][] keySet = XEdDsaTestHelper.generateCompatibleKeySet();
         byte[] seed = keySet[0];
         byte[] x25519PublicKey = keySet[2];
@@ -134,32 +134,42 @@ class XEdDsaVerifierTest {
 
     @Test
     void verify_nullPublicKey_throwsException() {
+        byte[] message = "test".getBytes();
+        byte[] signature = new byte[64];
         assertThrows(SignatureVerificationException.class,
-                () -> verifier.verify(null, "test".getBytes(), new byte[64]));
+                () -> verifier.verify(null, message, signature));
     }
 
     @Test
     void verify_wrongKeyLength_throwsException() {
+        byte[] key = new byte[16];
+        byte[] message = "test".getBytes();
+        byte[] signature = new byte[64];
         assertThrows(SignatureVerificationException.class,
-                () -> verifier.verify(new byte[16], "test".getBytes(), new byte[64]));
+                () -> verifier.verify(key, message, signature));
     }
 
     @Test
     void verify_wrongSignatureLength_throwsException() {
+        byte[] key = new byte[32];
+        byte[] message = "test".getBytes();
+        byte[] signature = new byte[48];
         assertThrows(SignatureVerificationException.class,
-                () -> verifier.verify(new byte[32], "test".getBytes(), new byte[48]));
+                () -> verifier.verify(key, message, signature));
     }
 
     @Test
     void verify_nullMessage_throwsException() {
+        byte[] key = new byte[32];
+        byte[] signature = new byte[64];
         assertThrows(SignatureVerificationException.class,
-                () -> verifier.verify(new byte[32], null, new byte[64]));
+                () -> verifier.verify(key, null, signature));
     }
 
     // --- Boundary cases ---
 
     @Test
-    void verify_scalarS_exceedsOrder_returnsFalse() {
+    void verify_scalarS_exceedsOrder_returnsFalse() throws SignatureVerificationException {
         byte[] key = new byte[32];
         key[0] = 9;
         byte[] msg = "test".getBytes(StandardCharsets.UTF_8);
@@ -171,7 +181,7 @@ class XEdDsaVerifierTest {
     }
 
     @Test
-    void verify_allZeroSignature_returnsFalse() {
+    void verify_allZeroSignature_returnsFalse() throws SignatureVerificationException {
         byte[] key = new byte[32];
         key[0] = 9;
         byte[] msg = "test".getBytes(StandardCharsets.UTF_8);

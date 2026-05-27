@@ -12,7 +12,7 @@ import java.util.Arrays;
  * XEdDSA signature verifier for X25519 public keys.
  * <p>
  * Implements verification per the Signal XEdDSA specification:
- * https://signal.org/docs/specifications/xeddsa/xeddsa.pdf
+ * <a href="https://signal.org/docs/specifications/xeddsa/xeddsa.pdf">...</a>
  * <p>
  * XEdDSA verify is equivalent to standard Ed25519 verify (RFC 8032 §5.1.7)
  * with the public key derived from the X25519 Montgomery u-coordinate via
@@ -40,7 +40,7 @@ public class XEdDsaVerifier {
      * @return true if the signature is valid
      * @throws SignatureVerificationException if inputs have invalid length or encoding
      */
-    public boolean verify(byte[] x25519PublicKey, byte[] message, byte[] signature) {
+    public boolean verify(byte[] x25519PublicKey, byte[] message, byte[] signature) throws SignatureVerificationException {
         if (x25519PublicKey == null || x25519PublicKey.length != KEY_LENGTH) {
             throw new SignatureVerificationException(
                     "X25519 public key must be exactly 32 bytes, got " +
@@ -68,18 +68,17 @@ public class XEdDsaVerifier {
         }
 
         // Convert Montgomery u-coordinate to Ed25519 public key encoding
-        byte[] edPublicKey = convertMontgomeryToEdwards(x25519PublicKey);
-
-        // Use Bouncy Castle Ed25519 verification (RFC 8032)
-        // This computes: h = SHA-512(R || A || M) mod q, checks sB == R + hA
+        // and verify using Bouncy Castle Ed25519 (RFC 8032)
         try {
+            byte[] edPublicKey = convertMontgomeryToEdwards(x25519PublicKey);
+
             Ed25519PublicKeyParameters pubKeyParams = new Ed25519PublicKeyParameters(edPublicKey, 0);
             Ed25519Signer verifier = new Ed25519Signer();
             verifier.init(false, pubKeyParams);
             verifier.update(message, 0, message.length);
             return verifier.verifySignature(signature);
         } catch (Exception e) {
-            // Invalid point encoding or other crypto failure → signature invalid
+            // Invalid point encoding, degenerate key, or other crypto failure → signature invalid
             return false;
         }
     }

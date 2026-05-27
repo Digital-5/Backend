@@ -2,7 +2,6 @@ package com.digital5.data;
 
 import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 

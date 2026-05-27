@@ -1,6 +1,7 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
+import com.digital5.exception.DigitalException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +59,7 @@ class JWTServiceTest {
         AccountEntity account = new AccountEntity();
         account.setUuid(TEST_UUID);
         account.setUsername("testuser");
-        when(accountService.getUserByUUID(TEST_UUID)).thenReturn(account);
+        when(accountService.getUserFromUUID(TEST_UUID)).thenReturn(account);
     }
 
     private void mockSignatureValid() {
@@ -69,7 +70,7 @@ class JWTServiceTest {
     // --- Tests ---
 
     @Test
-    void verifyJWT_validToken_returnsUuid() {
+    void verifyJWT_validToken_returnsUuid() throws Exception {
         mockAccountExists();
         mockSignatureValid();
 
@@ -80,53 +81,53 @@ class JWTServiceTest {
     }
 
     @Test
-    void verifyJWT_null_returnsNull() {
-        assertNull(jwtService.verifyJWT(null));
+    void verifyJWT_null_throwsException() {
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(null));
     }
 
     @Test
-    void verifyJWT_empty_returnsNull() {
-        assertNull(jwtService.verifyJWT(""));
+    void verifyJWT_empty_throwsException() {
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(""));
     }
 
     @Test
-    void verifyJWT_wrongPartCount_returnsNull() {
-        assertNull(jwtService.verifyJWT("only.two"));
-        assertNull(jwtService.verifyJWT("a.b.c.d"));
+    void verifyJWT_wrongPartCount_throwsException() {
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT("only.two"));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT("a.b.c.d"));
     }
 
     @Test
-    void verifyJWT_wrongAlgorithm_returnsNull() {
+    void verifyJWT_wrongAlgorithm_throwsException() {
         String header = "{\"alg\":\"RS256\",\"typ\":\"JWT\"}";
         String token = buildJwt(header, validPayload(), "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_wrongType_returnsNull() {
+    void verifyJWT_wrongType_throwsException() {
         String header = "{\"alg\":\"XEdDSA\",\"typ\":\"JWS\"}";
         String token = buildJwt(header, validPayload(), "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_missingSubject_returnsNull() {
+    void verifyJWT_missingSubject_throwsException() {
         long now = Instant.now().getEpochSecond();
         String payload = "{\"iat\":" + now + ",\"exp\":" + (now + 3600) + "}";
         String token = buildJwt(validHeader(), payload, "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_unknownUser_returnsNull() {
-        when(accountService.getUserByUUID(TEST_UUID)).thenReturn(null);
+    void verifyJWT_unknownUser_throwsException() {
+        when(accountService.getUserFromUUID(TEST_UUID)).thenReturn(null);
 
         String token = buildJwt(validHeader(), validPayload(), "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_expiredToken_returnsNull() {
+    void verifyJWT_expiredToken_throwsException() {
         mockAccountExists();
 
         long past = Instant.now().minusSeconds(7200).getEpochSecond();
@@ -134,11 +135,11 @@ class JWTServiceTest {
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"iat\":" + past + ",\"exp\":" + expired + "}";
 
         String token = buildJwt(validHeader(), payload, "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_futureIssuedAt_returnsNull() {
+    void verifyJWT_futureIssuedAt_throwsException() {
         mockAccountExists();
 
         long future = Instant.now().plusSeconds(3600).getEpochSecond();
@@ -146,11 +147,11 @@ class JWTServiceTest {
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"iat\":" + future + ",\"exp\":" + exp + "}";
 
         String token = buildJwt(validHeader(), payload, "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_expiryTooFarInFuture_returnsNull() {
+    void verifyJWT_expiryTooFarInFuture_throwsException() {
         mockAccountExists();
 
         long now = Instant.now().getEpochSecond();
@@ -159,48 +160,48 @@ class JWTServiceTest {
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"iat\":" + now + ",\"exp\":" + exp + "}";
 
         String token = buildJwt(validHeader(), payload, "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_invalidSignature_returnsNull() {
+    void verifyJWT_invalidSignature_throwsException() {
         mockAccountExists();
         when(publicKeyService.verifySignature(eq(TEST_UUID), anyString(), anyString()))
                 .thenReturn(false);
 
         String token = buildJwt(validHeader(), validPayload(), "badsig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_headerNotBase64_returnsNull() {
+    void verifyJWT_headerNotBase64_throwsException() {
         String token = "not-base64!." +
                 Base64.getUrlEncoder().withoutPadding()
                         .encodeToString(validPayload().getBytes(StandardCharsets.UTF_8)) +
                 ".sig";
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_missingIat_returnsNull() {
+    void verifyJWT_missingIat_throwsException() {
         mockAccountExists();
 
         long exp = Instant.now().plusSeconds(3600).getEpochSecond();
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"exp\":" + exp + "}";
 
         String token = buildJwt(validHeader(), payload, "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 
     @Test
-    void verifyJWT_missingExp_returnsNull() {
+    void verifyJWT_missingExp_throwsException() {
         mockAccountExists();
 
         long now = Instant.now().getEpochSecond();
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"iat\":" + now + "}";
 
         String token = buildJwt(validHeader(), payload, "sig");
-        assertNull(jwtService.verifyJWT(token));
+        assertThrows(DigitalException.class, () -> jwtService.verifyJWT(token));
     }
 }
 
