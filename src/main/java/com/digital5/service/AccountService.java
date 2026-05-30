@@ -1,11 +1,14 @@
 package com.digital5.service;
 
+import com.digital5.data.AccountStatus;
 import com.digital5.entity.AccountEntity;
+import com.digital5.entity.PublicKeysEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.logger.LogLevel;
 import com.digital5.logger.Logger;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.repository.AccountRepository;
+import com.digital5.repository.KeysRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private KeysRepository keysRepository;
     private JWTService jwtService;
 
     public String registerNewUser(RegisterModel registerModel) throws DigitalException {
@@ -34,10 +39,19 @@ public class AccountService {
             AccountEntity User = new AccountEntity(
                 uuid.toString(),
                 registerModel.getUsername(),
-                (short) 0,
+                    AccountStatus.UNVERIFIED.toShort(),
                 System.currentTimeMillis()
             );
             accountRepository.save(User);
+            PublicKeysEntity publicKeys = new PublicKeysEntity(
+                uuid.toString(),
+                registerModel.getIdentityKey(),
+                registerModel.getPreKey(),
+                registerModel.getPreKeySignature(),
+                registerModel.getKemKey(),
+                registerModel.getKeyKemSignature()
+            );
+
             return uuid.toString();
         } catch (Exception e) {
             Logger.logError(e);

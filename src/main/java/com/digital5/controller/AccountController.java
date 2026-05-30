@@ -19,8 +19,8 @@ public class AccountController {
 
     @PostMapping("/register")
     public ResponseEntity<String> requestAccess(@RequestBody RegisterModel registerModel) throws DigitalException {
-        accountService.registerNewUser(registerModel);
-        return ResponseEntity.ok("Account registered successfully");
+        String uuid = accountService.registerNewUser(registerModel);
+        return ResponseEntity.ok(uuid);
     }
 
     //todo

@@ -16,10 +16,10 @@ import lombok.Setter;
 public class OneTimesEntity {
 
     @Id
-    @Column(name="id",unique = true, nullable = false)
+    @Column(name="id", nullable = false)
     private String id;
-    @Column(name="username", nullable = false)
-    private String username;
+    @Column(name="uuid", nullable = false)
+    private String uuid;
     @Column(name="onetimecurve", nullable = false)
     private String oneTimeCurve;
     @Column(name="onetimekem", nullable = false)

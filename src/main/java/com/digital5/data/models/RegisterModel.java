@@ -13,6 +13,5 @@ public class RegisterModel {
     private String preKeySignature;
     private String kemKey;
     private String keyKemSignature;
-    private HashMap<String, String[]> oneTimeKeyPairs;
 
 }
