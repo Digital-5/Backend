@@ -17,5 +17,6 @@ public class MessageController {
 
     @PostMapping("/get")
     public void getMessages(@RequestBody JWTModel jwtModel) {
+        //todo implementieren
     }
 }
