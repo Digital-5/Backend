@@ -4,6 +4,8 @@ import com.digital5.crypto.exception.SignatureVerificationException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
@@ -13,9 +15,16 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for {@link XEdDsaVerifier}.
  */
+@SpringBootTest
 class XEdDsaVerifierTest {
 
-    private final XEdDsaVerifier verifier = new XEdDsaVerifier();
+
+    private final XEdDsaVerifier verifier;
+
+    @Autowired
+    public XEdDsaVerifierTest(XEdDsaVerifier verifier) {
+        this.verifier = verifier;
+    }
 
     @BeforeAll
     static void setup() {

@@ -17,6 +17,31 @@ public class ConversionService {
         return hexString.toString();
     }
 
+    /**
+     * concatenates the given arrays into one
+     *
+     * @param arrays the arrays to concatenate
+     * @return the concatenated array
+     * */
+    public byte[] concatenateByteArrays(byte[][] arrays) {
+
+        //calculate the number of bytes needed for the result array
+        int totalLength = 0;
+        for (byte[] array : arrays) {
+            totalLength += array.length;
+        }
+
+        byte[] result = new byte[totalLength];
+        int offset = 0;
+        for (byte[] array : arrays) {
+            for (int j = 0; j < array.length; j++) {
+                result[j + offset] = array[j];
+            }
+            offset += array.length;
+        }
+        return result;
+    }
+
     public String hexToString(String hexStr) {
         char[] tempchar = hexStr.toCharArray();
         StringBuilder outputString = new StringBuilder();
@@ -29,7 +54,6 @@ public class ConversionService {
 
         return outputString.toString();
     }
-
 
 
 }
