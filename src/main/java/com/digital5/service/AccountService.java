@@ -2,28 +2,26 @@ package com.digital5.service;
 
 import com.digital5.data.AccountStatus;
 import com.digital5.entity.AccountEntity;
-import com.digital5.entity.PublicKeysEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.logger.LogLevel;
 import com.digital5.logger.Logger;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.repository.AccountRepository;
-import com.digital5.repository.KeysRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.JsonNode;
 
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
-    @Autowired
-    private KeysRepository keysRepository;
-    private JWTService jwtService;
+
+    private PublicKeyService publicKeyService;
 
     public String registerNewUser(RegisterModel registerModel) throws DigitalException {
 
@@ -34,35 +32,21 @@ public class AccountService {
         //TODO: Verify all signatures!
         //TODO: verify if the keys are not already in use
 
-        UUID uuid = UUID.randomUUID();
+        String uuid = UUID.randomUUID().toString();
         try{
             AccountEntity User = new AccountEntity(
-                uuid.toString(),
+                uuid,
                 registerModel.getUsername(),
                     AccountStatus.UNVERIFIED.toShort(),
                 System.currentTimeMillis()
             );
             accountRepository.save(User);
-            PublicKeysEntity publicKeys = new PublicKeysEntity(
-                uuid.toString(),
-                registerModel.getIdentityKey(),
-                registerModel.getPreKey(),
-                registerModel.getPreKeySignature(),
-                registerModel.getKemKey(),
-                registerModel.getKeyKemSignature()
-            );
-
-            return uuid.toString();
+            publicKeyService.registerPublicKeys(registerModel, uuid);
+            return uuid;
         } catch (Exception e) {
             Logger.logError(e);
             throw new DigitalException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not register new account.");
         }
-    }
-
-    public AccountEntity authenticateUser(String jwt) {
-        JsonNode userNode = jwtService.verifyJWT(jwt);
-        String uuid = userNode.get("uuid").toString();
-        return getUserFromUUID(uuid);
     }
 
     public AccountEntity getUserFromUUID(String uuid) {

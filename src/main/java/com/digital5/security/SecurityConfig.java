@@ -1,4 +1,4 @@
-package com.digital5;
+package com.digital5.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -22,7 +22,8 @@ public class SecurityConfig {
                     request.requestMatchers("/account/register").permitAll();
                     request.anyRequest().authenticated();
                 })
-                .addFilterAfter(bearerTokenAuthFilter, BasicAuthenticationFilter.class);
+                // place the bearer token filter before basic auth so it can populate the SecurityContext
+                .addFilterBefore(bearerTokenAuthFilter, BasicAuthenticationFilter.class);
         return http.build();
     }
 

@@ -1,13 +1,14 @@
 package com.digital5.controller;
 
-import com.digital5.data.DataResponse;
-import com.digital5.data.models.AuthenticationModel;
 import com.digital5.entity.AccountEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
@@ -23,14 +24,21 @@ public class AccountController {
         return ResponseEntity.ok(uuid);
     }
 
-    //todo
-    // api to view the acceptance status (verify via jwt)
     @GetMapping("/status")
-    public ResponseEntity<String> viewStatus(@RequestBody AuthenticationModel authenticationModel) throws DigitalException {
-        String jwt = authenticationModel.getJwt();
-        AccountEntity user = accountService.authenticateUser(jwt);
-        DataResponse response = new DataResponse();
-        response.addData("account_status", String.valueOf(user.getStatus()));
-        return ResponseEntity.ok(response.toJsonString());
+    public ResponseEntity<String> viewStatus() throws DigitalException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("unauthorized");
+        }
+
+        AccountEntity account = (AccountEntity) auth.getPrincipal();
+
+        return ResponseEntity.ok(String.valueOf(account.getStatus()));
+    }
+
+    @GetMapping("/add_onetimes")
+    public ResponseEntity<String> addOneTimes() throws DigitalException {
+        return null;
     }
 }
