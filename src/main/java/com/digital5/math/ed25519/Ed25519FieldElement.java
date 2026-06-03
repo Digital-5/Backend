@@ -834,6 +834,7 @@ public class Ed25519FieldElement extends FieldElement {
      *
      * @return This field element to the power of $(2^{252} - 3)$.
      */
+    @Override
     public FieldElement pow22523() {
         FieldElement t0, t1, t2;
 
