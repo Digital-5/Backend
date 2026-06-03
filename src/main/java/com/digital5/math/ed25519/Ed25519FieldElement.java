@@ -713,6 +713,7 @@ public class Ed25519FieldElement extends FieldElement {
      *
      * @return The inverse of this field element.
      */
+    @Override
     public FieldElement invert() {
         FieldElement t0, t1, t2, t3;
 
