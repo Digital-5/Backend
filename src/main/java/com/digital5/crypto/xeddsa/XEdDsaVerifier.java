@@ -1,14 +1,15 @@
 package com.digital5.crypto.xeddsa;
 
 import com.digital5.crypto.exception.SignatureVerificationException;
-import com.digital5.service.ConversionService;
+import com.digital5.math.*;
+import com.digital5.math.ed25519.Ed25519LittleEndianEncoding;
 
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.digital5.math.ed25519.Ed25519ScalarOps;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 /**
@@ -31,26 +32,40 @@ public class XEdDsaVerifier {
     private static final BigInteger CURVE_ORDER = new BigInteger(
             "7237005577332262213973186563042994240857116359379907606001950938285454250989");
 
-    /** Ed25519 base point x-coordinate */
-    private static final BigInteger BASE_POINT_X = new BigInteger(
-            "15112221349535400772501151409588531511454012693041857206046113283949847762202");
-
-    /** Ed25519 base point y-coordinate */
-    private static final BigInteger BASE_POINT_Y = new BigInteger(
-            "46316835694926478169428394003475163141307993866256225615783033603165251855960");
-
     private static final int KEY_LENGTH = 32;
     private static final int SIGNATURE_LENGTH = 64;
 
-    private final ConversionService conversionService;
+    /** Ed25519 curve parameters – initialized once, thread-safe (all fields are final). */
+    private static final Field ED25519_FIELD = new Field(
+            256,
+            Utils.hexToBytes("edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"),
+            new Ed25519LittleEndianEncoding());
 
-    @Autowired
-    public XEdDsaVerifier(ConversionService conversionService) {
-        this.conversionService = conversionService;
-    }
+    private static final Curve ED25519_CURVE = new Curve(
+            ED25519_FIELD,
+            Utils.hexToBytes("a3785913ca4deb75abd841414d0a700098e879777940c78c73fe6f2bee6c0352"), // d
+            ED25519_FIELD.fromByteArray(Utils.hexToBytes("b0a00e4a271beec478e42fad0618432fa7d7fb3d99004d2b0bdfc14f8024832b"))); // I = sqrt(-1)
+
+    /** Base point B with precomputed tables for scalar multiplication. */
+    private static final GroupElement BASE_POINT = ED25519_CURVE.createPoint(
+            Utils.hexToBytes("5866666666666666666666666666666666666666666666666666666666666666"),
+            true);
+
+    private static final ScalarOps SCALAR_OPS = new Ed25519ScalarOps();
+
+    // Instance references (use static finals above)
+    private static final Curve curve = ED25519_CURVE;
+    private static final GroupElement basePoint = BASE_POINT;
+    private static final ScalarOps scalarOps = SCALAR_OPS;
+
 
     /**
      * Verifies an XEdDSA signature against an X25519 public key.
+     * <p>
+     * Implements verification per the Signal XEdDSA specification:
+     * <a href="https://signal.org/docs/specifications/xeddsa/xeddsa.pdf">XEdDSA</a>
+     * <p>
+     * Verification equation: [s]B = R + [h]A, equivalently: [s]B - [h]A = R
      *
      * @param x25519PublicKey 32-byte X25519 public key (Montgomery u-coordinate, little-endian)
      * @param message         the signed message (arbitrary length)
@@ -59,6 +74,60 @@ public class XEdDsaVerifier {
      * @throws SignatureVerificationException if inputs have invalid length or encoding
      */
     public boolean verify(byte[] x25519PublicKey, byte[] message, byte[] signature) throws SignatureVerificationException {
+        validateInputs(x25519PublicKey, message, signature);
+
+        // Reject u-coordinate >= p (non-canonical encoding)
+        BigInteger uCoordinate = littleEndianToBigInteger(x25519PublicKey);
+        if (uCoordinate.compareTo(FIELD_PRIME) >= 0) {
+            return false;
+        }
+
+        // Reject scalar s >= q (prevents signature malleability)
+        byte[] sBytes = Arrays.copyOfRange(signature, 32, 64);
+        BigInteger scalar = littleEndianToBigInteger(sBytes);
+        if (scalar.compareTo(CURVE_ORDER) >= 0) {
+            return false;
+        }
+
+        try {
+            // Convert Montgomery u-coordinate to Edwards y-coordinate
+            byte[] edwardsPublicKey = convertMontgomeryToEdwards(x25519PublicKey);
+
+            // Decode signature point R (first 32 bytes)
+            byte[] encodedR = Arrays.copyOfRange(signature, 0, 32);
+
+            // Decode points from their 32-byte Edwards encoding
+            GroupElement A = curve.createPoint(edwardsPublicKey, true); // precompute for doubleScalarMultiply
+
+            // Reject identity point as public key (allows trivial forgery)
+            if (A.equals(curve.getZero(GroupElement.Representation.P3))) {
+                return false;
+            }
+
+            // Compute challenge hash: h = SHA-512(R || A || M) mod q
+            byte[] hashInput = concatenate(encodedR, edwardsPublicKey, message);
+            MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+            byte[] hash64 = sha512.digest(hashInput);
+            byte[] hBytes = scalarOps.reduce(hash64);
+
+            // Verification: check [s]B - [h]A == R
+            // doubleScalarMultiplyVariableTime(A, a, b) computes a*A + b*B
+            // We negate A so that: h*(-A) + s*B = s*B - h*A
+            GroupElement negA = A.negate();
+            GroupElement Rcheck = basePoint.doubleScalarMultiplyVariableTime(negA, hBytes, sBytes);
+
+            // Constant-time comparison of computed R with signature R
+            return MessageDigest.isEqual(Rcheck.toByteArray(), encodedR);
+
+        } catch (IllegalArgumentException e) {
+            // Invalid point encoding (not on curve) → signature invalid
+            return false;
+        } catch (NoSuchAlgorithmException e) {
+            throw new SignatureVerificationException("SHA-512 not available"+ e);
+        }
+    }
+
+    private void validateInputs(byte[] x25519PublicKey, byte[] message, byte[] signature) throws SignatureVerificationException {
         if (x25519PublicKey == null || x25519PublicKey.length != KEY_LENGTH) {
             throw new SignatureVerificationException(
                     "X25519 public key must be exactly 32 bytes, got " +
@@ -72,52 +141,20 @@ public class XEdDsaVerifier {
         if (message == null) {
             throw new SignatureVerificationException("Message must not be null");
         }
+    }
 
-        // Range checks per XEdDSA spec
-        BigInteger uCoordinate = littleEndianToBigInteger(x25519PublicKey);
-        if (uCoordinate.compareTo(FIELD_PRIME) >= 0) {
-            return false;
+    private static byte[] concatenate(byte[]... arrays) {
+        int totalLength = 0;
+        for (byte[] arr : arrays) {
+            totalLength += arr.length;
         }
-
-        byte[] scalarBytes = Arrays.copyOfRange(signature, 32, 64);
-        BigInteger scalar = littleEndianToBigInteger(scalarBytes);
-
-        if (scalar.compareTo(CURVE_ORDER) >= 0) {
-            return false;
+        byte[] result = new byte[totalLength];
+        int offset = 0;
+        for (byte[] arr : arrays) {
+            System.arraycopy(arr, 0, result, offset, arr.length);
+            offset += arr.length;
         }
-
-        BigInteger encodedR = littleEndianToBigInteger(signature);
-        BigInteger signBit = encodedR.shiftRight(255);
-        BigInteger rYCoordinate = encodedR.and(BigInteger.ONE.shiftLeft(255).subtract(BigInteger.ONE));
-        if (signBit.equals(BigInteger.ONE) || rYCoordinate.compareTo(FIELD_PRIME) >= 0) {
-            return false;
-        }
-
-        // Verify that point u is on the curve and perform signature check
-        try {
-            byte[] edwardsPublicKey = convertMontgomeryToEdwards(x25519PublicKey);
-
-            byte[] encodedRBytes = Arrays.copyOfRange(signature, 0, 32);
-            byte[] rWithoutSignBit = Arrays.copyOf(encodedRBytes, encodedRBytes.length);
-            rWithoutSignBit[31] &= 0x7F; // Clear sign bit
-
-            byte[] hashInput = conversionService.concatenateByteArrays(new byte[][]{encodedRBytes, edwardsPublicKey, message});
-            MessageDigest hasher = MessageDigest.getInstance("SHA-512");
-            byte[] hashBytes = hasher.digest(hashInput);
-            BigInteger challengeHash = littleEndianToBigInteger(hashBytes);
-            challengeHash = challengeHash.mod(CURVE_ORDER);
-
-            // Point arithmetic using Bouncy Castle
-            Ed25519PublicKeyParameters rPoint = new Ed25519PublicKeyParameters(encodedRBytes, 0);
-            Ed25519PublicKeyParameters aPoint = new Ed25519PublicKeyParameters(edwardsPublicKey, 0);
-            //todo write point conversion myself bc there is no public version
-            // and then verify S * Base Point == R + h * Public Key
-            return false;
-
-        } catch (Exception e) { //todo better exception catching with logging and divide problems
-            // Invalid point encoding, degenerate key, or other crypto failure → signature invalid
-            return false;
-        }
+        return result;
     }
 
     /**
