@@ -79,8 +79,7 @@ public class JWTService {
     }
 
     private boolean validateSignature(AccountEntity account, String toSign, String signature) throws DigitalException {
-        //testing only TODO!
-        return true;
+        return publicKeyService.verifySignature(account, toSign, signature);
     }
 
 }

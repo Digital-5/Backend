@@ -1,12 +1,16 @@
 package com.digital5.service;
 
 import com.digital5.data.AccountStatus;
+import com.digital5.data.models.OneTimeKeyModel;
 import com.digital5.entity.AccountEntity;
+import com.digital5.entity.OneTimesEntity;
+import com.digital5.entity.PublicKeysEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.logger.LogLevel;
 import com.digital5.logger.Logger;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.repository.AccountRepository;
+import com.digital5.repository.OneTimeKeyRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,8 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private OneTimeKeyRepository oneTimeKeyRepository;
 
     private PublicKeyService publicKeyService;
 
@@ -55,5 +61,22 @@ public class AccountService {
             Logger.log(LogLevel.WARN, "User with UUID: " + uuid + " was requested, but not found.");
         }
         return account;
+    }
+
+    public String addNewOneTimeKeys(AccountEntity account, OneTimeKeyModel oneTimeKeyModel) throws DigitalException {
+        if (publicKeyService.verifySignature(account, oneTimeKeyModel.getOneTimeKemKey(), oneTimeKeyModel.getOneTimeKemSignature())) {
+            UUID uuid = UUID.randomUUID();
+            OneTimesEntity oneTimes = new OneTimesEntity(
+                uuid.toString(),
+                account.getUuid(),
+                oneTimeKeyModel.getOneTimeCurveKey(),
+                oneTimeKeyModel.getOneTimeKemKey(),
+                oneTimeKeyModel.getOneTimeKemSignature()
+            );
+            oneTimeKeyRepository.save(oneTimes);
+            return uuid.toString();
+        }else {
+            throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid signature for one time key.");
+        }
     }
 }

@@ -3,7 +3,7 @@ package com.digital5.service;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.entity.AccountEntity;
 import com.digital5.entity.PublicKeysEntity;
-import com.digital5.repository.KeysRepository;
+import com.digital5.repository.PublicKeysRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class PublicKeyService {
 
     @Autowired
-    private KeysRepository keysRepository;
+    private PublicKeysRepository publicKeysRepository;
 
     public void registerPublicKeys(RegisterModel registerModel, String uuid) {
         PublicKeysEntity publicKeys = new PublicKeysEntity(
@@ -24,7 +24,7 @@ public class PublicKeyService {
                 registerModel.getKemKey(),
                 registerModel.getKeyKemSignature()
         );
-        keysRepository.save(publicKeys);
+        publicKeysRepository.save(publicKeys);
     }
 
     public boolean verifySignature(AccountEntity account, String data, String signature){
