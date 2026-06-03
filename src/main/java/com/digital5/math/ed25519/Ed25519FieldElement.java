@@ -405,6 +405,7 @@ public class Ed25519FieldElement extends FieldElement {
      *
      * @return The (reasonably reduced) square of this field element.
      */
+    @Override
     public FieldElement square() {
         int f0 = t[0];
         int f1 = t[1];
