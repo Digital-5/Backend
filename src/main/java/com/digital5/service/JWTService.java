@@ -32,7 +32,6 @@ public class JWTService {
             String uuid = validatePayload(splitToken[1]);
             AccountEntity account = accountService.getUserFromUUID(uuid);
             if (account == null) {
-                System.out.println("Account is null");
                 return null;
             }
             boolean validSignature = validateSignature(account, splitToken[0] + "." + splitToken[1], splitToken[2]);

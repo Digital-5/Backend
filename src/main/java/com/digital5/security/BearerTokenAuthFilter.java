@@ -26,14 +26,11 @@ public class BearerTokenAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        System.out.println("Auth header: " + authHeader);
 
         if(authHeader != null && authHeader.startsWith("Bearer ") && !authHeader.substring(7).isBlank()) {
             String accessToken = authHeader.substring(7);
-            System.out.println("Access token: " + accessToken);
             try {
                 AccountEntity account = jwtService.verifyJWT(accessToken);
-                System.out.println("Account: " + account);
                 if(account == null) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 }
