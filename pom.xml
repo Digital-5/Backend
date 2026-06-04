@@ -33,7 +33,7 @@
         <assertj.version>3.27.7</assertj.version>
         <logback.version>1.5.25</logback.version>
         <spring-framework.version>7.0.7</spring-framework.version>
-        <jackson-bom.version>3.1.1</jackson-bom.version>
+        <jackson-bom.version>3.0.2</jackson-bom.version>
     </properties>
     <dependencies>
         <dependency>
@@ -67,10 +67,11 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.80</version>
+            <version>1.84</version>
             <scope>test</scope>
         </dependency>
         <dependency>
