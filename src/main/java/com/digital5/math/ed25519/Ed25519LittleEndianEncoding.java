@@ -75,6 +75,7 @@ public class Ed25519LittleEndianEncoding extends Encoding {
      * <p>
      * Inserting the expression for $x$ into $(1)$ we get the desired expression for $q$.
      */
+    @Override
     public byte[] encode(FieldElement x) {
         int[] h = ((Ed25519FieldElement)x).t;
         int h0 = h[0];
