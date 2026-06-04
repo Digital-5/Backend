@@ -174,6 +174,7 @@ public class Ed25519FieldElement extends FieldElement {
      * @param val The field element to multiply.
      * @return The (reasonably reduced) field element this * val.
      */
+    @Override
     public FieldElement multiply(FieldElement val) {
         int[] g = ((Ed25519FieldElement)val).t;
         int g1_19 = 19 * g[1]; /* 1.959375*2^29 */
