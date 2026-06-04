@@ -248,6 +248,7 @@ public class Ed25519LittleEndianEncoding extends Encoding {
      *
      * @return true if $x$ is in $\{1,3,5,\dots,q-2\}$, false otherwise.
      */
+    @Override
     public boolean isNegative(FieldElement x) {
         byte[] s = encode(x);
         return (s[0] & 1) != 0;
