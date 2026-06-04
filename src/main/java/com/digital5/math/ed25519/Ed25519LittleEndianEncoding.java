@@ -186,6 +186,7 @@ public class Ed25519LittleEndianEncoding extends Encoding {
      * @param in The 32 byte representation.
      * @return The field element in its $2^{25.5}$ bit representation.
      */
+    @Override
     public FieldElement decode(byte[] in) {
         long h0 = load_4(in, 0);
         long h1 = load_3(in, 4) << 6;
