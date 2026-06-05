@@ -338,6 +338,7 @@ public class Ed25519ScalarOps implements ScalarOps {
      * <p>
      * See the comments in {@link #reduce(byte[])} for an explanation of the algorithm.
      */
+    @Override
     public byte[] multiplyAndAdd(byte[] a, byte[] b, byte[] c) {
         long a0 = 0x1FFFFF & load_3(a, 0);
         long a1 = 0x1FFFFF & (load_4(a, 2) >> 5);
