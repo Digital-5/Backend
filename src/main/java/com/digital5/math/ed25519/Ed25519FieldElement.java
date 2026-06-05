@@ -51,6 +51,7 @@ public class Ed25519FieldElement extends FieldElement {
      *
      * @return 1 if it is non-zero, 0 otherwise.
      */
+    @Override
     public boolean isNonZero() {
         final byte[] s = toByteArray();
         return Utils.equal(s, ZERO) == 0;
