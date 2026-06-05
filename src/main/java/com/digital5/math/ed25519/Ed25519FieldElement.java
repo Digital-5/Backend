@@ -74,6 +74,7 @@ public class Ed25519FieldElement extends FieldElement {
      * @param val The field element to add.
      * @return The field element this + val.
      */
+    @Override
     public FieldElement add(FieldElement val) {
         int[] g = ((Ed25519FieldElement)val).t;
         int[] h = new int[10];
