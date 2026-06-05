@@ -52,7 +52,7 @@ public class PublicKeyService {
             byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
             signatureBytes = hexToBytes(signature);
 
-            return xEdDsaVerifier.verify(publicKeyBytes, dataBytes, signatureBytes); //todo too many layers of verifiers
+            return xEdDsaVerifier.verify(publicKeyBytes, dataBytes, signatureBytes);
         } catch (Exception e) {
             return false;
         } finally {

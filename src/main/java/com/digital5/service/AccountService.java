@@ -26,9 +26,6 @@ public class AccountService {
             throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid Username, should be only alphanumeric between 4-30 characters.");
         }
 
-        //TODO: Verify all signatures!
-        //TODO: verify if the keys are not already in use
-
         UUID uuid = UUID.randomUUID();
         try{
             AccountEntity user = new AccountEntity(

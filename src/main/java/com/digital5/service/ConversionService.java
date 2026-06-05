@@ -10,7 +10,7 @@ public class ConversionService {
         StringBuilder hexString = new StringBuilder();
         char[] characters = str.toCharArray();
         for (char c : characters) {
-            int intValue = (int) c; //each char gets transformed into Unicode
+            int intValue = c; //each char gets transformed into Unicode
             String hexValue = Integer.toHexString(intValue); //and then to hex
             hexString.append(hexValue);
         }
