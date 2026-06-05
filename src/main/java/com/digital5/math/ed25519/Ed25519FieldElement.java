@@ -128,6 +128,7 @@ public class Ed25519FieldElement extends FieldElement {
      *
      * @return The field element (-1) * this.
      */
+    @Override
     public FieldElement negate() {
         int[] h = new int[10];
         for (int i = 0; i < 10; i++) {
