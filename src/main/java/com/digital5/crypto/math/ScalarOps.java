@@ -9,7 +9,7 @@
  * work. If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.
  *
  */
-package com.digital5.math;
+package com.digital5.crypto.math;
 
 public interface ScalarOps {
     /**

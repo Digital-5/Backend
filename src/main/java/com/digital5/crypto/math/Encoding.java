@@ -9,7 +9,7 @@
  * work. If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.
  *
  */
-package com.digital5.math;
+package com.digital5.crypto.math;
 
 /**
  * Common interface for all $(b-1)$-bit encodings of elements

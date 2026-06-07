@@ -9,11 +9,11 @@
  * work. If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.
  *
  */
-package com.digital5.math.ed25519;
+package com.digital5.crypto.math.ed25519;
 
-import com.digital5.math.ScalarOps;
-import static com.digital5.math.ed25519.Ed25519LittleEndianEncoding.load_3;
-import static com.digital5.math.ed25519.Ed25519LittleEndianEncoding.load_4;
+import com.digital5.crypto.math.ScalarOps;
+import static com.digital5.crypto.math.ed25519.Ed25519LittleEndianEncoding.load_3;
+import static com.digital5.crypto.math.ed25519.Ed25519LittleEndianEncoding.load_4;
 
 /**
  * Class for reducing a huge integer modulo the group order q and

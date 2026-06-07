@@ -1,10 +1,10 @@
 package com.digital5.crypto.xeddsa;
 
 import com.digital5.crypto.exception.SignatureVerificationException;
-import com.digital5.math.*;
-import com.digital5.math.ed25519.Ed25519LittleEndianEncoding;
+import com.digital5.crypto.math.*;
+import com.digital5.crypto.math.ed25519.Ed25519LittleEndianEncoding;
 
-import com.digital5.math.ed25519.Ed25519ScalarOps;
+import com.digital5.crypto.math.ed25519.Ed25519ScalarOps;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;

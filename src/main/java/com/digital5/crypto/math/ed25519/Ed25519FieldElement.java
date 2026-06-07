@@ -9,9 +9,11 @@
  * work. If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.
  *
  */
-package com.digital5.math.ed25519;
+package com.digital5.crypto.math.ed25519;
 
-import com.digital5.math.Utils;
+import com.digital5.crypto.math.Field;
+import com.digital5.crypto.math.FieldElement;
+import com.digital5.crypto.math.Utils;
 import com.digital5.math.*;
 
 import java.util.Arrays;

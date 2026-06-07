@@ -9,9 +9,7 @@
  * work. If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.
  *
  */
-package com.digital5.math;
-
-import com.digital5.math.Utils;
+package com.digital5.crypto.math;
 
 import java.io.Serializable;
 import java.util.Arrays;
