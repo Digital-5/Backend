@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:17-alpine
     restart: always
-    port:
+    ports:
       - 5432:5432
     environment:
       POSTGRES_DB: digital
