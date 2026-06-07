@@ -1,10 +1,11 @@
 package com.digital5.data.models;
 
+import lombok.Getter;
+
+@Getter
 public class SendMessageModel {
 
-    private String jwt;
     private String recipient;
-    private String encryptedHeader;
-    private String messageBody;
+    private String data;
 
 }

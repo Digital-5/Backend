@@ -1,7 +1,9 @@
 package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
+import com.digital5.exception.DigitalException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -21,28 +23,25 @@ public class JWTService {
     private AccountService accountService;
     private PublicKeyService publicKeyService;
 
-    public JsonNode verifyJWT(String token) {
-        return null;
-        /*
-        try {
-            String[] splitToken = token.split("\\.");
-            if (splitToken.length != 3) {
-                return false;
-            }
-            if (validateHeader(splitToken[0]) &&
-            String uuid = validatePayload(splitToken[1], splitToken[2]);
-            if (uuid == null) {
-                return false;
-            }
-            publicKeyService.verifySignature(uuid, splitToken[0]+"."+splitToken[1], splitToken[2]);
-
-            return true;
-        } catch (Exception e) {
-            return false;
+    public AccountEntity verifyJWT(String token) throws DigitalException {
+        String[] splitToken = token.split("\\.");
+        if (splitToken.length != 3) {
+            return null;
         }
-         */
-    }
+        if (validateHeader(splitToken[0])) {
+            String uuid = validatePayload(splitToken[1]);
+            AccountEntity account = accountService.getUserFromUUID(uuid);
+            if (account == null) {
+                return null;
+            }
+            boolean validSignature = validateSignature(account, splitToken[0] + "." + splitToken[1], splitToken[2]);
+            if (validSignature) {
+                return account;
+            }
 
+        }
+        return null;
+    }
 
     private boolean validateHeader(String header) {
         ObjectMapper mapper = new ObjectMapper();
@@ -58,7 +57,7 @@ public class JWTService {
         }
     }
 
-    private String validatePayload(String payload, String signature) {
+    private String validatePayload(String payload) throws DigitalException {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode root = mapper.readTree(payload);
@@ -72,8 +71,14 @@ public class JWTService {
             assert expiresAt.after(Date.from(Instant.now().plus(JWT_EXPIRY_TIME, JWT_EXPIRY_UNIT)));
             return account.getUuid();
         } catch (JacksonException e) {
-            return null;
+            throw new DigitalException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not parse JWT");
+        } catch (AssertionError e) {
+            throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid Authentication");
         }
+    }
+
+    private boolean validateSignature(AccountEntity account, String toSign, String signature) throws DigitalException {
+        return publicKeyService.verifySignature(account, toSign, signature);
     }
 
 }
