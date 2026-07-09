@@ -1,13 +1,14 @@
 package com.digital5.controller;
 
-import com.digital5.data.DataResponse;
-import com.digital5.data.models.AuthenticationModel;
+import com.digital5.data.models.OneTimeKeyModel;
 import com.digital5.entity.AccountEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
@@ -19,16 +20,30 @@ public class AccountController {
 
     @PostMapping("/register")
     public ResponseEntity<String> requestAccess(@RequestBody RegisterModel registerModel) throws DigitalException {
-        accountService.registerNewUser(registerModel);
-        return ResponseEntity.ok("Account registered successfully");
+        String uuid = accountService.registerNewUser(registerModel);
+        return ResponseEntity.ok(uuid);
     }
 
     @GetMapping("/status")
-    public ResponseEntity<String> viewStatus(@RequestBody AuthenticationModel authenticationModel) throws DigitalException {
-        String jwt = authenticationModel.getJwt();
-        AccountEntity user = accountService.authenticateUser(jwt);
-        DataResponse response = new DataResponse();
-        response.addData("account_status", String.valueOf(user.getStatus()));
-        return ResponseEntity.ok(response.toJsonString());
+    public ResponseEntity<String> viewStatus() throws DigitalException {
+        AccountEntity account = (AccountEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (account != null) {
+            return ResponseEntity.ok(String.valueOf(account.getStatus()));
+        }else {
+            throw new DigitalException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+    }
+
+    @PostMapping("/add_onetimes")
+    public ResponseEntity<String> addOneTimes(@RequestBody OneTimeKeyModel oneTimeKeyModel) throws DigitalException {
+        AccountEntity account = (AccountEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (account != null) {
+            String responseUUID = accountService.addNewOneTimeKeys(account, oneTimeKeyModel);
+            return ResponseEntity.ok(responseUUID);
+        }else {
+            throw new DigitalException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
     }
 }

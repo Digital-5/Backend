@@ -4,7 +4,13 @@ import com.digital5.crypto.xeddsa.XEdDsaVerifier;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.entity.PublicKeysEntity;
 import com.digital5.repository.KeysRepository;
+import com.digital5.entity.AccountEntity;
+import com.digital5.entity.PublicKeysEntity;
+import com.digital5.repository.PublicKeysRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -13,6 +19,7 @@ import java.util.Arrays;
  * Service for managing public keys and verifying XEdDSA signatures.
  */
 @Service
+@AllArgsConstructor
 public class PublicKeyService {
 
     private final KeysRepository keysRepository;

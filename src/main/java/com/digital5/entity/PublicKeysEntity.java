@@ -21,7 +21,7 @@ public class PublicKeysEntity {
     private String preKey;
     @Column(name="prekey_signature", nullable = false)
     private String preKeySignature;
-    @Column(name="last_resort_kemkey", nullable = false)
+    @Column(name = "kemkey", nullable = false)
     private String kemKey;
     @Column(name="kemkey_signature", nullable = false)
     private String kemKeySignature;

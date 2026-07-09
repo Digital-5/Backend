@@ -2,6 +2,7 @@ package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
 import com.digital5.exception.DigitalException;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
@@ -133,9 +134,16 @@ public class JWTService {
             }
 
             return account.getUuid();
-        } catch (Exception e) {
-            return null;
+          //todo check if everything was catched
+        } catch (JacksonException e) {
+            throw new DigitalException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not parse JWT");
+        } catch (AssertionError e) {
+            throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid Authentication");
         }
+    }
+
+    private boolean validateSignature(AccountEntity account, String toSign, String signature) throws DigitalException {
+        return publicKeyService.verifySignature(account, toSign, signature);
     }
 
 }

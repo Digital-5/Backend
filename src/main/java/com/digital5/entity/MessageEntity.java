@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Entity(name="messages")
 @Table(name="messages")
 @Getter @Setter
@@ -24,7 +26,6 @@ public class MessageEntity {
     private String recipient;
     @Column(name="data", nullable = false)
     private String data;
-    @Column(name="rachetparams", nullable = false)
-    private String rachetparams;
-
+    @Column(name="timestamp", nullable = false)
+    private Timestamp timestamp;
 }

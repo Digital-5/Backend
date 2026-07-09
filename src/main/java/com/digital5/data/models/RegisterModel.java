@@ -2,8 +2,6 @@ package com.digital5.data.models;
 
 import lombok.Getter;
 
-import java.util.HashMap;
-
 @Getter
 public class RegisterModel {
 
@@ -13,6 +11,5 @@ public class RegisterModel {
     private String preKeySignature;
     private String kemKey;
     private String keyKemSignature;
-    private HashMap<String, String[]> oneTimeKeyPairs;
 
 }
