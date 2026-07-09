@@ -1000,10 +1000,10 @@ public class GroupElement implements Serializable {
                     // Accumulate bits if possible
                     if (r[i + b] != 0) {
                         if (r[i] + (r[i + b] << b) <= 15) {
-                            r[i] += r[i + b] << b;
+                            r[i] = (byte) (r[i] + (r[i + b] << b));
                             r[i + b] = 0;
                         } else if (r[i] - (r[i + b] << b) >= -15) {
-                            r[i] -= r[i + b] << b;
+                            r[i] = (byte) (r[i] - (r[i + b] << b));
                             for (int k = i + b; k < 256; ++k) {
                                 if (r[k] == 0) {
                                     r[k] = 1;
