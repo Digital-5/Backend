@@ -104,6 +104,12 @@ public class XEdDsaVerifier {
                 return false;
             }
 
+            // Reject small-order points: compute [8]A and check if it equals identity.
+            // All 8 small-order points on Ed25519 satisfy [8]P = identity.
+            if (hasSmallOrder(A)) {
+                return false;
+            }
+
             // Compute challenge hash: h = SHA-512(R || A || M) mod q
             byte[] hashInput = concatenate(encodedR, edwardsPublicKey, message);
             MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
@@ -119,6 +125,9 @@ public class XEdDsaVerifier {
             // Constant-time comparison of computed R with signature R
             return MessageDigest.isEqual(Rcheck.toByteArray(), encodedR);
 
+        } catch (ArithmeticException e) {
+            // Denominator zero in Montgomery-to-Edwards conversion (u = p-1)
+            return false;
         } catch (IllegalArgumentException e) {
             // Invalid point encoding (not on curve) → signature invalid
             return false;
@@ -165,6 +174,7 @@ public class XEdDsaVerifier {
      *
      * @param x25519PublicKey 32-byte Montgomery u-coordinate (little-endian)
      * @return 32-byte Ed25519 public key encoding
+     * @throws ArithmeticException if the denominator (u + 1) is zero mod p
      */
     byte[] convertMontgomeryToEdwards(byte[] x25519PublicKey) {
         BigInteger uCoordinate = littleEndianToBigInteger(x25519PublicKey);
@@ -176,6 +186,12 @@ public class XEdDsaVerifier {
         // Division in modular arithmetic: multiply by modular inverse
         BigInteger numerator = uCoordinate.subtract(BigInteger.ONE).mod(FIELD_PRIME);
         BigInteger denominator = uCoordinate.add(BigInteger.ONE).mod(FIELD_PRIME);
+
+        // When u = p-1, denominator is zero and modInverse is undefined
+        if (denominator.equals(BigInteger.ZERO)) {
+            throw new ArithmeticException("Denominator is zero: u = p-1 maps to undefined point");
+        }
+
         BigInteger denominatorInverse = denominator.modInverse(FIELD_PRIME);
         BigInteger yCoordinate = numerator.multiply(denominatorInverse).mod(FIELD_PRIME);
 
@@ -184,6 +200,18 @@ public class XEdDsaVerifier {
         encoded[31] &= 0x7F; // Ensure sign bit is cleared
 
         return encoded;
+    }
+
+    /**
+     * Checks if a point has small order by computing [8]P and testing if the result is the identity.
+     * The Ed25519 cofactor is 8, so all 8 small-order points satisfy [8]P = identity.
+     *
+     * @param point the Edwards point to check (must be in P3 representation)
+     * @return true if the point has small order (must be rejected)
+     */
+    private boolean hasSmallOrder(GroupElement point) {
+        GroupElement result = point.dbl().toP2().dbl().toP2().dbl().toP3(); // [8]P
+        return result.equals(curve.getZero(GroupElement.Representation.P3));
     }
 
     /**

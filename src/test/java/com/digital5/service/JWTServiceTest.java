@@ -120,6 +120,7 @@ class JWTServiceTest {
 
     @Test
     void verifyJWT_unknownUser_throwsException() {
+        mockSignatureValid();
         when(accountService.getUserFromUUID(TEST_UUID)).thenReturn(null);
 
         String token = buildJwt(validHeader(), validPayload(), "sig");
@@ -129,6 +130,7 @@ class JWTServiceTest {
     @Test
     void verifyJWT_expiredToken_throwsException() {
         mockAccountExists();
+        mockSignatureValid();
 
         long past = Instant.now().minusSeconds(7200).getEpochSecond();
         long expired = Instant.now().minusSeconds(3600).getEpochSecond();
@@ -141,6 +143,7 @@ class JWTServiceTest {
     @Test
     void verifyJWT_futureIssuedAt_throwsException() {
         mockAccountExists();
+        mockSignatureValid();
 
         long future = Instant.now().plusSeconds(3600).getEpochSecond();
         long exp = Instant.now().plusSeconds(7200).getEpochSecond();
@@ -153,6 +156,7 @@ class JWTServiceTest {
     @Test
     void verifyJWT_expiryTooFarInFuture_throwsException() {
         mockAccountExists();
+        mockSignatureValid();
 
         long now = Instant.now().getEpochSecond();
         // Expires in 2 days (exceeds 1 day max)
@@ -165,7 +169,6 @@ class JWTServiceTest {
 
     @Test
     void verifyJWT_invalidSignature_throwsException() {
-        mockAccountExists();
         when(publicKeyService.verifySignature(eq(TEST_UUID), anyString(), anyString()))
                 .thenReturn(false);
 
@@ -185,6 +188,7 @@ class JWTServiceTest {
     @Test
     void verifyJWT_missingIat_throwsException() {
         mockAccountExists();
+        mockSignatureValid();
 
         long exp = Instant.now().plusSeconds(3600).getEpochSecond();
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"exp\":" + exp + "}";
@@ -196,6 +200,7 @@ class JWTServiceTest {
     @Test
     void verifyJWT_missingExp_throwsException() {
         mockAccountExists();
+        mockSignatureValid();
 
         long now = Instant.now().getEpochSecond();
         String payload = "{\"sub\":\"" + TEST_UUID + "\",\"iat\":" + now + "}";

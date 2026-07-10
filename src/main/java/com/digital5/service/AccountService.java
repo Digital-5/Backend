@@ -10,14 +10,10 @@ import com.digital5.logger.Logger;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.repository.AccountRepository;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.digital5.repository.OneTimeKeyRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -26,13 +22,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AccountService {
 
-    @Autowired
     private AccountRepository accountRepository;
-    @Autowired
     private OneTimeKeyRepository oneTimeKeyRepository;
-
     private PublicKeyService publicKeyService;
+    private JWTService jwtService;
 
+    @Transactional
     public String registerNewUser(@NonNull RegisterModel registerModel) throws DigitalException {
 
         if (!registerModel.getUsername().toLowerCase().matches("^[a-z0-9]{4,30}$")) {
@@ -47,18 +42,22 @@ public class AccountService {
                     AccountStatus.UNVERIFIED.toShort(),
                 System.currentTimeMillis()
             );
-            //todo check if this is really needed bc it wasnt in my branch
-            publicKeyService.registerPublicKeys(registerModel, uuid);
-          
+
+            //save user and his public keys in the db
+            publicKeyService.registerPublicKeys(registerModel, String.valueOf(uuid));
             accountRepository.save(user);
             return uuid.toString();
-        } catch (Exception e) {
+        }
+        catch (DigitalException e) {
+            throw e;
+        }
+        catch (Exception e) { //catches db exceptions
             Logger.logError(e);
             throw new DigitalException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not register new account.");
         }
     }
 
-    public AccountEntity authenticateUser(String jwt) throws DigitalException {
+    public AccountEntity authenticateUser(@NonNull String jwt) throws DigitalException {
         String uuid = jwtService.verifyJWT(jwt);
         return getUserFromUUID(uuid);
     }
@@ -73,7 +72,7 @@ public class AccountService {
 
     @Transactional
     public String addNewOneTimeKeys(AccountEntity account, OneTimeKeyModel oneTimeKeyModel) throws DigitalException {
-        if (publicKeyService.verifySignature(account, oneTimeKeyModel.getOneTimeKemKey(), oneTimeKeyModel.getOneTimeKemSignature())) {
+        if (publicKeyService.verifySignature(account.getUuid(), oneTimeKeyModel.getOneTimeKemKey(), oneTimeKeyModel.getOneTimeKemSignature())) {
             UUID uuid = UUID.randomUUID();
             OneTimesEntity oneTimes = new OneTimesEntity(
                 uuid.toString(),
