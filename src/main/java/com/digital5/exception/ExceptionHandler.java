@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import com.digital5.data.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
+//todo change to @Slf4j for simplicity
 @ControllerAdvice
 public class ExceptionHandler {
 
