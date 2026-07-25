@@ -1,0 +1,2 @@
+This following code has been mostly copied from https://github.com/wso2/wso2-ed25519-java and adapted to our needs. It is a pure mathematical implementation of the Ed25519 curve operations, without any of the key management, encoding, or provider logic from the original library. The code focuses solely on the core mathematical functions required for point calculations on the Ed25519 curve, such as scalar multiplication, point addition, and field arithmetic.
+The original code is from https://github.com/str4d/ed25519-java, however it is no longer mantained.

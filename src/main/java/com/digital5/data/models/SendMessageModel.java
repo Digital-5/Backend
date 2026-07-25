@@ -1,11 +1,14 @@
 package com.digital5.data.models;
 
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
 public class SendMessageModel {
 
-    private String recipient;
-    private String data;
+    @NonNull String signedString;
+    @NonNull String encryptedHeader;
+    @NonNull String messageBody;
+
 
 }

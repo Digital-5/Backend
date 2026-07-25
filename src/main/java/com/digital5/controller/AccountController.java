@@ -5,6 +5,7 @@ import com.digital5.entity.AccountEntity;
 import com.digital5.exception.DigitalException;
 import com.digital5.data.models.RegisterModel;
 import com.digital5.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> requestAccess(@RequestBody RegisterModel registerModel) throws DigitalException {
+    public ResponseEntity<String> requestAccess(@Valid @RequestBody RegisterModel registerModel) throws DigitalException {
         String uuid = accountService.registerNewUser(registerModel);
         return ResponseEntity.ok(uuid);
     }
