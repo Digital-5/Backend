@@ -2,9 +2,10 @@ package com.digital5.service;
 
 import com.digital5.entity.AccountEntity;
 import com.digital5.exception.DigitalException;
-import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -31,7 +32,7 @@ public class JWTService {
     private final AccountService accountService;
     private final PublicKeyService publicKeyService;
 
-    public JWTService(AccountService accountService, PublicKeyService publicKeyService) {
+    public JWTService(@Lazy AccountService accountService, PublicKeyService publicKeyService) {
         this.objectMapper = new ObjectMapper();
         this.accountService = accountService;
         this.publicKeyService = publicKeyService;
@@ -60,20 +61,36 @@ public class JWTService {
                 throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
             }
 
-
-            String uuid = validatePayload(parts[1]);
-            // Signature covers "header.payload" as raw ASCII bytes
-            String signedData = parts[0] + "." + parts[1];
-
-            if (!validateHeader(parts[0]) ||uuid==null ||!publicKeyService.verifySignature(uuid, signedData, parts[2])) {
+            // 1. Validate header structure (cheap, no I/O)
+            if (!validateHeader(parts[0])) {
                 throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
             }
 
-            return uuid;
+            // 2. Extract subject from payload without DB lookup
+            String payloadJson = decodeBase64url(parts[1]);
+            JsonNode payloadRoot = objectMapper.readTree(payloadJson);
+            if (!payloadRoot.has("sub")) {
+                throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
+            }
+            String uuid = payloadRoot.get("sub").asString();
+
+            // 3. Verify signature before hitting the DB (prevents DoS via forged tokens)
+            String signedData = parts[0] + "." + parts[1];
+            if (uuid == null || !publicKeyService.verifySignature(uuid, signedData, parts[2])) {
+                throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
+            }
+
+            // 4. Validate payload claims (DB lookup + timestamp checks)
+            String validatedUuid = validatePayload(parts[1]);
+            if (validatedUuid == null) {
+                throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token format.");
+            }
+
+            return validatedUuid;
         } catch (DigitalException e) {
             throw e;
-        } catch (Exception e) {
-            return null;
+        } catch (IllegalArgumentException e) {
+            throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid JWT token.");
         }
     }
 
@@ -92,7 +109,7 @@ public class JWTService {
         }
     }
 
-    private String validatePayload(String payloadBase64url) {
+    private String validatePayload(String payloadBase64url) throws DigitalException {
         try {
             String payloadJson = decodeBase64url(payloadBase64url);
             JsonNode root = objectMapper.readTree(payloadJson);
@@ -140,10 +157,6 @@ public class JWTService {
         } catch (AssertionError e) {
             throw new DigitalException(HttpStatus.BAD_REQUEST, "Invalid Authentication");
         }
-    }
-
-    private boolean validateSignature(AccountEntity account, String toSign, String signature) throws DigitalException {
-        return publicKeyService.verifySignature(account, toSign, signature);
     }
 
 }

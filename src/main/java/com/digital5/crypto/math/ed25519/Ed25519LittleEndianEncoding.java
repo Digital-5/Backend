@@ -13,7 +13,6 @@ package com.digital5.crypto.math.ed25519;
 
 import com.digital5.crypto.math.Encoding;
 import com.digital5.crypto.math.FieldElement;
-import com.digital5.math.*;
 
 /**
  * Helper class for encoding/decoding from/to the 32 byte representation.
